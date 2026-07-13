@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hourly log-sweep alerting via elnora-slack. Save to
+  ~/Library/LaunchAgents/com.example.slack-log-sweep.plist, replace the
+  {{PLACEHOLDERS}}, then: launchctl load ~/Library/LaunchAgents/com.example.slack-log-sweep.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.slack-log-sweep</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-lc</string>
+        <string>{{REPO_ROOT}}/templates/log-sweep.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>LOG_FILE</key>
+        <string>{{LOG_FILE}}</string>
+        <key>ALERT_CHANNEL</key>
+        <string>{{CHANNEL_ID}}</string>
+        <key>PATTERN</key>
+        <string>ERROR|FATAL</string>
+    </dict>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>StandardOutPath</key>
+    <string>/tmp/slack-log-sweep.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/slack-log-sweep.err.log</string>
+</dict>
+</plist>

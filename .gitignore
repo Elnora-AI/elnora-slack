@@ -1,0 +1,33 @@
+# Node.js
+node_modules/
+*.tgz
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# Populated workspace reference caches never enter this repo.
+# Only the committed *.template.md files ship; /slack-sync writes the real
+# workspace-users.md / workspace-channels.md next to them (or to
+# $SLACK_REFERENCES_DIR), and those stay local.
+references/*.md
+!references/*.template.md

@@ -1,0 +1,12 @@
+# gitleaks config for elnora-slack.
+# Extend the built-in ruleset, then allow-list the one path that legitimately
+# contains a token-shaped string: Slack's upstream OpenAPI spec ships
+# documentation example tokens (e.g. xoxb-…) that are not real credentials.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Slack's upstream OpenAPI spec contains documentation example tokens."
+paths = [
+  '''spec/slack_web_openapi_v2\.json''',
+]

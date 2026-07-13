@@ -1,0 +1,14 @@
+# elnora-slack scheduled-job examples for cron (Linux). Edit with `crontab -e`.
+# Replace the {{PLACEHOLDERS}} and adjust the schedules. The scripts read the
+# Slack token from ~/.config/elnora-slack/.env, so no secrets belong here.
+#
+# Make the scripts executable first:  chmod +x {{REPO_ROOT}}/templates/*.sh
+
+# Weekly digest — Mondays at 09:00
+0 9 * * 1  SLACK_DM_USER={{DM_USER_ID}} DIGEST_CMD="{{DIGEST_COMMAND}}" {{REPO_ROOT}}/templates/weekly-digest.sh
+
+# Log-sweep — every hour on the hour
+0 * * * *  LOG_FILE={{LOG_FILE}} ALERT_CHANNEL={{CHANNEL_ID}} PATTERN="ERROR|FATAL" {{REPO_ROOT}}/templates/log-sweep.sh
+
+# Notify-on-failure — wrap a nightly job at 02:30 so a non-zero exit DMs you
+30 2 * * *  SLACK_DM_USER={{DM_USER_ID}} {{REPO_ROOT}}/templates/notify-on-failure.sh {{REPO_ROOT}}/scripts/nightly-job.sh

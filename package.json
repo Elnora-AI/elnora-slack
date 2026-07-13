@@ -1,0 +1,79 @@
+{
+  "name": "@elnora-ai/slack",
+  "version": "0.1.0",
+  "description": "The entire Slack Web API as a CLI and a Claude Code plugin — 201 methods, agent-friendly JSON, approval-gated sending",
+  "type": "module",
+  "bin": {
+    "elnora-slack": "dist/main.js"
+  },
+  "main": "dist/main.js",
+  "files": [
+    "dist/",
+    "commands/",
+    "skills/",
+    "hooks/",
+    "spec/",
+    "references/*.template.md",
+    "templates/",
+    ".claude-plugin/",
+    "app-manifest.json",
+    "AGENTS.md",
+    "INSTALL_FOR_AGENTS.md",
+    "README.md",
+    "SAFETY.md",
+    "docs/",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/main.ts",
+    "generate": "tsx src/generate.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src/ __tests__/",
+    "lint:fix": "biome check --write src/ __tests__/",
+    "format": "biome format --write src/ __tests__/",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "slack",
+    "slack-api",
+    "claude-code",
+    "claude-code-plugin",
+    "cli",
+    "agent",
+    "automation",
+    "messaging",
+    "elnora"
+  ],
+  "author": "Elnora AI <opensource@elnora.ai>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elnora-AI/elnora-slack"
+  },
+  "bugs": {
+    "url": "https://github.com/Elnora-AI/elnora-slack/issues"
+  },
+  "homepage": "https://github.com/Elnora-AI/elnora-slack",
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.15.2",
+    "commander": "^14.0.3"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "display_information": {
+    "name": "Slack Agent CLI",
+    "description": "Drives the Slack Web API from a terminal or an AI agent via elnora-slack.",
+    "background_color": "#1a1d21"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "slack-agent",
+      "always_online": false
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "chat:write",
+        "users:read",
+        "users:read.email",
+        "channels:read",
+        "groups:read",
+        "channels:history",
+        "groups:history",
+        "im:read",
+        "im:write",
+        "im:history",
+        "mpim:read",
+        "mpim:history",
+        "files:read",
+        "files:write",
+        "reactions:read",
+        "reactions:write",
+        "pins:read",
+        "pins:write",
+        "bookmarks:read",
+        "bookmarks:write",
+        "team:read",
+        "emoji:read"
+      ],
+      "user": [
+        "search:read"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Weekly digest via elnora-slack. Save to
+  ~/Library/LaunchAgents/com.example.slack-weekly-digest.plist, replace the
+  {{PLACEHOLDERS}}, then: launchctl load ~/Library/LaunchAgents/com.example.slack-weekly-digest.plist
+  Unload with: launchctl unload ~/Library/LaunchAgents/com.example.slack-weekly-digest.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.slack-weekly-digest</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-lc</string>
+        <string>{{REPO_ROOT}}/templates/weekly-digest.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>SLACK_DM_USER</key>
+        <string>{{DM_USER_ID}}</string>
+        <key>DIGEST_CMD</key>
+        <string>{{DIGEST_COMMAND}}</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>1</integer>
+        <key>Hour</key><integer>9</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/tmp/slack-weekly-digest.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/slack-weekly-digest.err.log</string>
+</dict>
+</plist>

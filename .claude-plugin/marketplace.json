@@ -1,0 +1,24 @@
+{
+  "name": "elnora-slack",
+  "description": "Slack workspace for Claude Code — single-plugin marketplace.",
+  "owner": {
+    "name": "Elnora AI",
+    "email": "opensource@elnora.ai",
+    "url": "https://github.com/Elnora-AI"
+  },
+  "plugins": [
+    {
+      "name": "slack-workspace",
+      "description": "The entire Slack Web API for Claude Code — 201 methods, approval-gated sending, a cached workspace reference, and scheduled-job alerting.",
+      "source": "./",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": [
+        "slack",
+        "messaging",
+        "communication",
+        "automation"
+      ]
+    }
+  ]
+}

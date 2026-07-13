@@ -1,0 +1,16 @@
+{
+  "description": "Slack workspace hooks: auto-sync staleness check",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-sync.py\" || python \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-sync.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
