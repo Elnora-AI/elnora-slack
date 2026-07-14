@@ -19,6 +19,7 @@ import { WebClient } from "@slack/web-api";
 import { Chat } from "chat";
 import { agent } from "./agent";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
+import { resolveEmojiAction } from "./emoji-actions";
 import { scrubSlackBroadcasts } from "./slack-scrub";
 
 // ---------------------------------------------------------------------------
@@ -87,7 +88,13 @@ async function handleMessage(
 	// the memory. Instead we read the actual thread replies (or recent channel/
 	// DM history) from Slack each time — real memory, no Redis required.
 	const context = await fetchSlackContext(thread, message);
-	const messages = [...context, { role: "user" as const, content: userText }];
+	// Attribute the current turn so the agent knows who it's acting for —
+	// in group channels several people talk to the bot in the same thread.
+	const sender = message.author.fullName || message.author.userName || message.author.userId;
+	const messages = [
+		...context,
+		{ role: "user" as const, content: `[from ${sender} (<@${message.author.userId}>)] ${userText}` },
+	];
 
 	try {
 		// Generate the full response, then post it. Streaming via thread.post
@@ -211,10 +218,16 @@ async function fetchSlackContext(
 		const botId = await getBotUserId();
 		return msgs
 			.filter((x) => x.text && x.ts !== raw.ts)
-			.map((x) => ({
-				role: (botId && x.user === botId) || x.bot_id ? ("assistant" as const) : ("user" as const),
-				content: (x.text as string).slice(0, MAX_MSG_LENGTH),
-			}));
+			.map((x) => {
+				const isAssistant = (botId && x.user === botId) || !!x.bot_id;
+				// Attribute human turns with the sender's Slack ID so the agent can
+				// tell speakers apart in multi-person channels.
+				const text = (x.text as string).slice(0, MAX_MSG_LENGTH);
+				return {
+					role: isAssistant ? ("assistant" as const) : ("user" as const),
+					content: isAssistant || !x.user ? text : `[from <@${x.user}>] ${text}`,
+				};
+			});
 	} catch (err) {
 		console.error("Failed to fetch Slack context:", err instanceof Error ? err.name : "unknown");
 		return [];
@@ -244,6 +257,80 @@ bot.onSubscribedMessage(async (thread, message) => {
 bot.onDirectMessage(async (thread, message) => {
 	await thread.subscribe();
 	await handleMessage(thread, message);
+});
+
+// ---------------------------------------------------------------------------
+// Emoji-reaction actions
+// ---------------------------------------------------------------------------
+//
+// React to any message with a mapped emoji and the agent runs the configured
+// action on your behalf (✅ = mark done, 🔖 = save to knowledge base, 👀 =
+// summarize, ❓ = explain — see emoji-actions.ts). Zero config by default;
+// customize or disable per-emoji via the EMOJI_ACTIONS env var. Requires the
+// `reaction_added` bot event in the Slack app manifest.
+
+/** Fetch the text of the message a reaction landed on (fallback path). */
+async function fetchReactedMessageText(channelId: string, ts: string): Promise<string | null> {
+	const token = process.env.SLACK_BOT_TOKEN;
+	if (!token) return null;
+	try {
+		const client = new WebClient(token, { timeout: 8_000 });
+		const res = await client.conversations.history({ channel: channelId, latest: ts, inclusive: true, limit: 1 });
+		const msg = (res.messages ?? [])[0] as { text?: string; ts?: string } | undefined;
+		return msg?.ts === ts ? (msg.text ?? null) : null;
+	} catch (err) {
+		console.error("Failed to fetch reacted message:", err instanceof Error ? err.name : "unknown");
+		return null;
+	}
+}
+
+bot.onReaction(async (event) => {
+	if (!event.added || event.user.isBot) return;
+
+	const instruction = resolveEmojiAction(event.rawEmoji);
+	if (!instruction) return; // unmapped emoji — stay silent
+
+	if (!isAuthorized(event.user.userId)) return; // no reply spam on stray reactions
+
+	// The reacted message's text: from the event if the SDK resolved it,
+	// otherwise fetched from Slack via the raw event's channel + ts.
+	const raw = event.raw as { item?: { channel?: string; ts?: string } } | undefined;
+	let targetText = event.message?.text ?? null;
+	if (!targetText && raw?.item?.channel && raw.item.ts) {
+		targetText = await fetchReactedMessageText(raw.item.channel, raw.item.ts);
+	}
+	if (!targetText) return; // nothing to act on (e.g. file-only message)
+
+	const reactor = event.user.fullName || event.user.userName || event.user.userId;
+
+	try {
+		await event.thread.startTyping();
+		const result = await agent.generate({
+			messages: [
+				{
+					role: "user" as const,
+					content: `${reactor} (<@${event.user.userId}>) reacted with :${event.rawEmoji}: to this Slack message:
+
+"""
+${targetText.slice(0, MAX_MSG_LENGTH)}
+"""
+
+Configured action for :${event.rawEmoji}:: ${instruction}
+
+Carry out the action on behalf of ${reactor}. Use connected tools where the action needs them. If the message doesn't give you enough to act on, say so in one line instead of guessing.`,
+				},
+			],
+		});
+		const text = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
+		if (text) await event.thread.post(text);
+	} catch (err) {
+		console.error("Emoji action error:", err instanceof Error ? err.name : "unknown");
+		try {
+			await event.thread.post(`Couldn't complete the :${event.rawEmoji}: action — check the deployment logs.`);
+		} catch {
+			console.error("Failed to post emoji-action error message");
+		}
+	}
 });
 
 // ---------------------------------------------------------------------------

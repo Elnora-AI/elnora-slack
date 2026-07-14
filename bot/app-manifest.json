@@ -77,7 +77,8 @@
         "message.groups",
         "message.im",
         "message.mpim",
-        "member_joined_channel"
+        "member_joined_channel",
+        "reaction_added"
       ]
     },
     "interactivity": {
