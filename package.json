@@ -74,6 +74,6 @@
   },
   "dependencies": {
     "@slack/web-api": "^7.15.2",
-    "commander": "^14.0.3"
+    "commander": "^15.0.0"
   }
 }
