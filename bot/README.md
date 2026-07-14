@@ -21,6 +21,8 @@ git clone https://github.com/Elnora-AI/elnora-slack.git
 cd elnora-slack/bot
 vercel --yes                      # create the project
 # set envs (see .env.example): ANTHROPIC_API_KEY, REDIS_URL, BOT_NAME, …
+# connect your knowledge base (the default tool — see below):
+#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, DRIVE_ID
 # create your Slack app from app-manifest.json (fill in your deployment URL)
 # then add SLACK_BOT_TOKEN + SLACK_SIGNING_SECRET and ship:
 vercel --prod
@@ -28,7 +30,7 @@ vercel --prod
 
 Or click-first:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,DRIVE_ID)
 
 > **Pasting secrets:** when a terminal prompt (`vercel env add`, a provisioning
 > script, or a `.env` step) asks you to paste a token or secret, the terminal
@@ -51,6 +53,31 @@ Or click-first:
 - Every incoming message is attributed to its Slack sender, so in a busy
   thread the agent knows exactly who asked for what and acts on that
   person's behalf.
+
+## Knowledge base (the default connection)
+
+The bot ships to answer from **your** documents, not just its own knowledge — so
+connecting a knowledge base is the one tool you set up as part of the standard
+install, not an afterthought. It's a Google Drive shared drive (or folder): the
+bot gets `kbSearch` (full-text search over your docs), `kbReadFile` (read a
+document by ID), and `kbCreateNote` (save a markdown note back).
+
+Four env vars turn it on:
+
+| Variable | What | Where from |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` | OAuth app | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth client ID (Desktop app) |
+| `GOOGLE_CLIENT_SECRET` | OAuth app | same screen |
+| `GOOGLE_REFRESH_TOKEN` | Drive access grant | [OAuth Playground](https://developers.google.com/oauthplayground), scope `.../auth/drive` (or `GOOGLE_DRIVE_REFRESH_TOKEN` for a separate grant) |
+| `DRIVE_ID` | which drive holds the docs | the ID in `drive.google.com/drive/folders/<DRIVE_ID>` |
+
+Then optionally `NOTES_FOLDER_ID` (folder where new notes are saved — enables
+`kbCreateNote`) and `KB_NAME` (what the bot calls it, e.g. "Acme knowledge
+vault"). Enable the **Google Drive API** on the project, `vercel --prod`, and ask
+the bot in Slack to "search the knowledge base for X" to confirm. The same
+`GOOGLE_*` credentials also light up Gmail and Calendar once their scopes are on
+the token. Step-by-step (with browser-driven walkthrough) is
+[INSTALL_FOR_AGENTS.md → B7](../INSTALL_FOR_AGENTS.md#b7--connect-tools).
 
 ## Emoji actions
 

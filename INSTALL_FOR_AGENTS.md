@@ -271,6 +271,13 @@ Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
 `SYSTEM_PROMPT_APPEND` for org-specific instructions. Model defaults to
 `claude-sonnet-5` (override with `BOT_MODEL`).
 
+**Plan to connect the knowledge base in this same pass.** It's the bot's default
+connection — the whole point is that it answers from the user's own documents,
+not just the model's training. You'll wire the `GOOGLE_*` + `DRIVE_ID` vars in
+[B7](#b7--connect-tools); flag it now so the user has their Google Drive ID and a
+Drive refresh token ready, and don't consider the setup "done" until the bot
+answers a question from their real docs (unless they explicitly decline).
+
 Have the **user** paste each value at the prompt (values never enter the
 chat):
 
@@ -380,12 +387,14 @@ under **Event Subscriptions** and reinstall the app.
 
 Each tool group lights up when its env vars exist (set them with
 `vercel env add … production`, then `vercel --prod` to redeploy — envs are
-baked at deploy time). Ask the user which they want; **the knowledge base is
-the default** — offer it first.
+baked at deploy time). **Set up the knowledge base as part of this standard
+install** — it's the default connection and the reason the bot is useful on day
+one; do it before asking about the others, and only skip it if the user
+explicitly declines. Then ask which of the remaining tools they want.
 
-**Knowledge base (Google Drive) — default.** Gives the bot `kbSearch` /
-`kbReadFile` (+ `kbCreateNote` with a notes folder). Needs a Google OAuth
-client + refresh token:
+**Knowledge base (Google Drive) — the default connection, set this up.** Gives
+the bot `kbSearch` / `kbReadFile` (+ `kbCreateNote` with a notes folder). Needs
+a Google OAuth client + refresh token:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
    *(offer to drive)*: create (or reuse) a project → **OAuth client ID** →
