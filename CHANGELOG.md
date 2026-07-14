@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.1...v0.1.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **ci:** build before test in the release workflow ([#11](https://github.com/Elnora-AI/elnora-slack/issues/11)) ([f905c46](https://github.com/Elnora-AI/elnora-slack/commit/f905c4637d42de93d8baee25f761f9eab32eeaab))
+
 ## [0.1.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.0...v0.1.1) (2026-07-14)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@elnora-ai/slack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The entire Slack Web API as a CLI and a Claude Code plugin — 201 methods, agent-friendly JSON, approval-gated sending",
   "type": "module",
   "bin": {
