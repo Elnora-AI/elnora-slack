@@ -363,11 +363,11 @@ async function runSlashCommand(event: SlashEvent, prompt: string): Promise<void>
 // /ask — general question to the agent (uses any connected tools).
 bot.onSlashCommand("/ask", (event) => runSlashCommand(event, event.text?.trim() || "What can you do?"));
 
-// /note — save a URL (or text) to the knowledge base.
+// /note — save a URL (or text) to the knowledge base as a high-quality note.
 bot.onSlashCommand("/note", (event) =>
 	runSlashCommand(
 		event,
-		`Save this to the knowledge base as a note (fetch and summarize if it's a URL): ${event.text?.trim() ?? ""}`,
+		`Save this to the knowledge base as a complete, high-quality note using kbCreateNote. If it's a URL, fetch the page first and summarize it faithfully (don't invent details). Before saving, search the knowledge base for related notes and link them. Save it once — do not create duplicates. Content: ${event.text?.trim() ?? ""}`,
 	),
 );
 
