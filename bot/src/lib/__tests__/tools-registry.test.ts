@@ -4,6 +4,9 @@ import { buildTools, toolGroups } from "../tools";
 const GATING_ENVS = [
 	"LINEAR_API_KEY",
 	"TAVILY_API_KEY",
+	"EXA_API_KEY",
+	"PERPLEXITY_API_KEY",
+	"VALYU_API_KEY",
 	"SLACK_USER_TOKEN",
 	"GOOGLE_CLIENT_ID",
 	"GOOGLE_CLIENT_SECRET",
