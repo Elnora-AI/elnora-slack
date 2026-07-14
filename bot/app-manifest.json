@@ -13,7 +13,36 @@
       "home_tab_enabled": false,
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
-    }
+    },
+    "slash_commands": [
+      {
+        "command": "/ask",
+        "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
+        "description": "Ask the AI agent anything",
+        "usage_hint": "[your question]",
+        "should_escape": false
+      },
+      {
+        "command": "/note",
+        "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
+        "description": "Save a URL or text to the knowledge base",
+        "usage_hint": "[url or text]",
+        "should_escape": false
+      },
+      {
+        "command": "/search",
+        "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
+        "description": "Search across every connected source",
+        "usage_hint": "[query]",
+        "should_escape": false
+      },
+      {
+        "command": "/status",
+        "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
+        "description": "Show which services the bot is connected to",
+        "should_escape": false
+      }
+    ]
   },
   "oauth_config": {
     "scopes": {
@@ -22,6 +51,7 @@
         "channels:history",
         "channels:read",
         "chat:write",
+        "commands",
         "groups:history",
         "groups:read",
         "im:history",
