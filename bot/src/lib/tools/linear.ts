@@ -1,4 +1,4 @@
-import { LinearClient } from "@linear/sdk";
+import { LinearClient, PaginationOrderBy } from "@linear/sdk";
 import { tool } from "ai";
 import { z } from "zod";
 import { withRetry } from "../with-retry";
@@ -40,6 +40,39 @@ export const linearSearchIssues = tool({
 			})),
 		);
 		return issues;
+	},
+});
+
+export const linearRecentIssues = tool({
+	description:
+		"List the most recent Linear issues, sorted by creation or last-update time (newest first). Use for 'latest', 'newest', or 'recently updated' issue questions — linearSearchIssues ranks by relevance, not recency.",
+	inputSchema: z.object({
+		orderBy: z
+			.enum(["createdAt", "updatedAt"])
+			.optional()
+			.default("createdAt")
+			.describe("createdAt = newest-created first, updatedAt = most recent activity first"),
+		teamKey: z.string().max(10).optional().describe("Restrict to one team key (discover with linearListTeams)"),
+		limit: z.number().optional().default(10).pipe(z.number().max(50)),
+	}),
+	execute: async ({ orderBy, teamKey, limit }) => {
+		const client = getClient();
+		const results = await client.issues({
+			first: limit,
+			orderBy: orderBy === "updatedAt" ? PaginationOrderBy.UpdatedAt : PaginationOrderBy.CreatedAt,
+			...(teamKey ? { filter: { team: { key: { eq: teamKey } } } } : {}),
+		});
+		return Promise.all(
+			results.nodes.map(async (issue) => ({
+				id: issue.identifier,
+				title: issue.title,
+				state: (await issue.state)?.name,
+				assignee: (await issue.assignee)?.name,
+				createdAt: issue.createdAt,
+				updatedAt: issue.updatedAt,
+				url: issue.url,
+			})),
+		);
 	},
 });
 
