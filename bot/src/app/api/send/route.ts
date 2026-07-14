@@ -64,7 +64,11 @@ export async function POST(request: Request) {
 		await ch.post(message);
 		return Response.json({ ok: true, type: "channel", channel: channelId });
 	} catch (err) {
-		console.error("Send handler error:", err instanceof Error ? err.message : "unknown");
+		// Strip CR/LF/tabs before logging — the error message can embed a
+		// user-supplied channel string (resolveChannelId), so an attacker could
+		// otherwise forge log entries (js/log-injection).
+		const detail = (err instanceof Error ? err.message : "unknown").replace(/[\r\n\t]/g, " ");
+		console.error("Send handler error:", detail);
 		return Response.json({ error: "Internal error" }, { status: 500 });
 	}
 }
