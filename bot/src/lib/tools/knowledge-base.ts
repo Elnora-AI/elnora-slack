@@ -127,7 +127,36 @@ export const kbReadFile = tool({
 });
 
 export const kbCreateNote = tool({
-	description: `Save a markdown note to the ${KB_NAME}. Build the full markdown content with YAML frontmatter (title, created YYYY-MM-DD, tags, description, and source_url if the note came from a web page) before calling.`,
+	description: `Save a markdown note to the ${KB_NAME}. Produce a complete, well-structured note — not a bare summary.
+
+Build the content as YAML frontmatter followed by a structured body.
+
+Frontmatter (in this order; omit a field only when it genuinely doesn't apply):
+  title: "Descriptive title"
+  created: YYYY-MM-DD        # today
+  updated: YYYY-MM-DD        # today
+  tags:                      # block list; ALWAYS lead with saved-note and web-clipping,
+    - saved-note             # then 5-15 specific lowercase kebab-case tags an agent would
+    - web-clipping           # search for (technologies, domains, concepts, entities)
+    - ...
+  description: "1-2 sentence summary"
+  source_url: "https://..."  # if the note came from a web page
+  source_title: "Original page title"   # if from a web page
+  source_date: "YYYY-MM-DD"  # date published on the page, if any
+  related:                   # links to related notes ALREADY in the KB — find them with
+    - "[Other Note Title](<file-id-or-url>)"   # kbSearch BEFORE saving; omit if none found
+
+Body:
+  # Title
+  > Source: <url|Original title>
+  > Saved: YYYY-MM-DD
+
+  ## Summary        (2-3 short paragraphs)
+  ## Key Points     (3-7 bullets)
+  ## Details        (deeper notes, if warranted)
+  ## Notable Quotes / Data   (blockquoted facts/quotes, if any)
+
+Before calling: run kbSearch to find related notes and populate \`related\`. Only assert facts supported by the source; don't inflate with unverifiable specifics. If a note for the same source already exists, this tool returns it instead of creating a duplicate — don't retry to force a second copy.`,
 	inputSchema: z.object({
 		fileName: z
 			.string()
@@ -147,6 +176,33 @@ export const kbCreateNote = tool({
 
 		try {
 			const drive = getDriveClient();
+
+			// Idempotency guard: if a note with this filename already exists in the
+			// folder, return it instead of creating a duplicate. Without this, a
+			// repeated tool call (agent retry, re-processed message) makes Drive
+			// silently create a second "name (1).md" file. fileName is regex-validated
+			// to [\w-] + ".md", so it's safe to interpolate into the query.
+			const existing = await drive.files.list({
+				q: `name = '${fileName}' and '${folderId}' in parents and trashed = false`,
+				corpora: "drive",
+				driveId: process.env.DRIVE_ID,
+				includeItemsFromAllDrives: true,
+				supportsAllDrives: true,
+				fields: "files(id,name,webViewLink)",
+				pageSize: 1,
+			});
+			const dupe = existing.data.files?.[0];
+			if (dupe) {
+				return {
+					success: true,
+					alreadyExists: true,
+					name: dupe.name,
+					url: dupe.webViewLink,
+					id: dupe.id,
+					message:
+						"A note with this filename already exists — returned the existing note instead of creating a duplicate.",
+				};
+			}
 
 			const res = await drive.files.create({
 				requestBody: {

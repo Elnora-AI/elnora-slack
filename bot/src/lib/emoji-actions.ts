@@ -15,7 +15,7 @@ export const DEFAULT_EMOJI_ACTIONS: Record<string, string> = {
 	white_check_mark:
 		"The user marked this message as DONE. If it references a task or issue in a connected tracker (e.g. Linear), find that issue and mark it done/closed. Otherwise just confirm it's been noted as completed. Reply with one line saying exactly what you did.",
 	bookmark:
-		"Save this message to the knowledge base as a note (fetch and summarize any URL it contains). Reply with one line confirming where it was saved.",
+		"Save this message to the knowledge base as a complete, high-quality note using kbCreateNote: fetch and faithfully summarize any URL it contains, search the knowledge base for related notes and link them, and save it once (no duplicates). Reply with one line confirming where it was saved.",
 	eyes: "Summarize this conversation so far — key points and any open questions or action items. Keep it short.",
 	question:
 		"Explain this message in plain terms: expand abbreviations, add missing context from connected tools if useful, and state what (if anything) the reader is being asked to do.",
