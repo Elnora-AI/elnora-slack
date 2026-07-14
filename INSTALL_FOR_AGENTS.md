@@ -90,6 +90,11 @@ into the file in Step 4, or set it as an environment variable themselves.
 
 ## Step 4 — Save the token(s)
 
+> **Heads-up for the user:** whenever a terminal prompt asks you to paste a
+> token or secret, you will see **nothing** as you paste — no characters, no
+> dots. That's hidden input working correctly, not a bug. Paste once and press
+> Enter.
+
 Write them to the per-user config file (mode 0600). Have the **user** run this so
 the token never passes through the chat — offer the exact commands:
 
@@ -274,6 +279,13 @@ vercel env add ANTHROPIC_API_KEY production
 vercel env add REDIS_URL production
 vercel env add BOT_NAME production
 ```
+
+> **Tell the user before they paste a secret:** the terminal shows **nothing**
+> when you paste a token or secret — no dots, no characters, no cursor
+> movement. That is deliberate (hidden input), not a failure. Paste once, press
+> Enter, and trust it landed. Do not paste twice (that doubles the value) and
+> do not retype it. This applies to `vercel env add`, the `provision*` scripts,
+> and the `.env` steps in Part A.
 
 **Access control:** by default **everyone in the workspace** can use the bot —
 that's the point of an org bot, and the signing secret guarantees events only

@@ -30,6 +30,11 @@ Or click-first:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET)
 
+> **Pasting secrets:** when a terminal prompt (`vercel env add`, a provisioning
+> script, or a `.env` step) asks you to paste a token or secret, the terminal
+> shows **nothing** as you paste — no characters, no dots. That's hidden input
+> working as intended. Paste once, press Enter, trust it landed.
+
 ## How it works
 
 - `POST /api/webhooks/slack` receives Slack Events API calls (mentions, DMs,
