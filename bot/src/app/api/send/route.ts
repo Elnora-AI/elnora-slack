@@ -64,11 +64,10 @@ export async function POST(request: Request) {
 		await ch.post(message);
 		return Response.json({ ok: true, type: "channel", channel: channelId });
 	} catch (err) {
-		// Strip CR/LF/tabs before logging — the error message can embed a
-		// user-supplied channel string (resolveChannelId), so an attacker could
-		// otherwise forge log entries (js/log-injection).
-		const detail = (err instanceof Error ? err.message : "unknown").replace(/[\r\n\t]/g, " ");
-		console.error("Send handler error:", detail);
+		// Log only the error TYPE, never its message — the message can embed a
+		// user-supplied channel string (resolveChannelId's error text), which is
+		// a log-injection sink (js/log-injection). The error name is constant.
+		console.error("Send handler error:", err instanceof Error ? err.name : "unknown error");
 		return Response.json({ error: "Internal error" }, { status: 500 });
 	}
 }
