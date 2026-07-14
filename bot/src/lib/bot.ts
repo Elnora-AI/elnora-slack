@@ -245,3 +245,54 @@ bot.onDirectMessage(async (thread, message) => {
 	await thread.subscribe();
 	await handleMessage(thread, message);
 });
+
+// ---------------------------------------------------------------------------
+// Slash commands
+// ---------------------------------------------------------------------------
+//
+// Universal shortcuts that route to the agent. To use them, declare the
+// matching commands in your Slack app manifest (bot/app-manifest.json) pointing
+// at this same webhook URL. Slash commands are workspace-unique, so if another
+// installed app already owns a name, pick a different one (or retire that app).
+
+type SlashEvent = Parameters<Parameters<typeof bot.onSlashCommand>[1]>[0];
+
+/** Run a slash command through the agent, gated by the same allowlist. */
+async function runSlashCommand(event: SlashEvent, prompt: string): Promise<void> {
+	if (!isAuthorized(event.user.userId)) {
+		await event.channel.post(UNAUTHORIZED_MSG);
+		return;
+	}
+	try {
+		const result = await agent.generate({ messages: [{ role: "user", content: prompt }] });
+		const text = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
+		await event.channel.post(text || "(done)");
+	} catch (err) {
+		console.error("Slash command error:", err instanceof Error ? err.name : "unknown");
+		await event.channel.post("Something went wrong. Check the deployment logs.");
+	}
+}
+
+// /ask — general question to the agent (uses any connected tools).
+bot.onSlashCommand("/ask", (event) => runSlashCommand(event, event.text?.trim() || "What can you do?"));
+
+// /note — save a URL (or text) to the knowledge base.
+bot.onSlashCommand("/note", (event) =>
+	runSlashCommand(
+		event,
+		`Save this to the knowledge base as a note (fetch and summarize if it's a URL): ${event.text?.trim() ?? ""}`,
+	),
+);
+
+// /search — search across every connected source.
+bot.onSlashCommand("/search", (event) =>
+	runSlashCommand(
+		event,
+		`Search every source you can (knowledge base, web, Linear, Slack) for: ${event.text?.trim() ?? ""}`,
+	),
+);
+
+// /status — report connected-service status.
+bot.onSlashCommand("/status", (event) =>
+	runSlashCommand(event, "Run the systemStatus tool and report which services are connected, using Slack mrkdwn."),
+);
