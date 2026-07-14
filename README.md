@@ -150,6 +150,17 @@ npm dependencies (auto-installed): [`@slack/web-api`](https://www.npmjs.com/pack
 
 ---
 
+## Part of the Elnora family
+
+`elnora-slack` works 100% standalone, and it is also the messaging backbone of a family of universal, config-driven Claude Code tools published by [Elnora AI](https://github.com/Elnora-AI). Each installs in one line, hardcodes nothing about any particular workspace, and chains with the others when you install more than one — this repo is typically the **delivery sink**: anything the other tools produce (digests, alerts, triage summaries) lands in Slack through the same draft-and-approve send gate.
+
+- **[elnora-linear](https://github.com/Elnora-AI/elnora-linear)** — Linear workspace for Claude Code: search, bulk edit, agents, and a config-driven backlog curator. Chain: point the curator's notification step at `elnora-slack` and its triage digests and stale-issue nudges arrive as Slack DMs, with issue links resolved against your synced workspace reference.
+- **[knowledge-vault](https://github.com/Elnora-AI/knowledge-vault)** — Obsidian vault power tools: search and save your work to any vault. Chain: capture a Slack thread (`elnora-slack conversations replies`) as a permanent vault note, or have vault-curation jobs report what they filed via a Slack DM.
+- **[elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace)** — Gmail, Calendar, Drive, Docs, Sheets, and any Google API via Discovery, with multi-account OAuth. Chain: schedule an inbox or calendar sweep and deliver the summary through `elnora-slack`'s notify-on-failure / weekly-digest job templates.
+- **[elnora-whatsapp](https://github.com/Elnora-AI/elnora-whatsapp)** — WhatsApp for Claude Code, 100% local from your own paired account. Chain: the sibling messaging surface — same untrusted-content rules and human-approval gate before anything is sent, so agents treat both channels identically.
+
+Every repo in the family follows the same conventions: your own credentials in your own config dir, nothing sent anywhere except the service's official API, a publication guard that keeps real IDs and secrets out of the tree, and a `SECURITY.md`. Browse the full set at [github.com/Elnora-AI](https://github.com/Elnora-AI).
+
 ## Development
 
 ```sh
