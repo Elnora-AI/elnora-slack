@@ -271,6 +271,13 @@ Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
 `SYSTEM_PROMPT_APPEND` for org-specific instructions. Model defaults to
 `claude-sonnet-5` (override with `BOT_MODEL`).
 
+**Plan to connect the knowledge base in this same pass.** It's the bot's default
+connection — the whole point is that it answers from the user's own documents,
+not just the model's training. You'll wire the `GOOGLE_*` + `DRIVE_ID` vars in
+[B7](#b7--connect-tools); flag it now so the user has their Google Drive ID and a
+Drive refresh token ready, and don't consider the setup "done" until the bot
+answers a question from their real docs (unless they explicitly decline).
+
 Have the **user** paste each value at the prompt (values never enter the
 chat):
 
@@ -312,7 +319,13 @@ manifest, plus Events API config).
      webhook route answers it automatically. If validation runs before your
      deploy finished, retry after B5.
 3. **Install to Workspace** → **Allow**.
-4. Collect two values (user pastes them straight into the env prompts, never
+4. **Brand it** *(offer to drive)*: still in the app config, go to **Basic
+   Information → Display Information** and upload the org's logo as the
+   **App icon** (512–2000 px square PNG) plus a background color. Slack has
+   no API for this — it's the one manual branding step, and every message
+   the bot sends will carry the logo from then on. Ask the user for the logo
+   file if you don't have it; skipping is fine, it can be added anytime.
+5. Collect two values (user pastes them straight into the env prompts, never
    the chat):
 
    ```sh
@@ -355,24 +368,33 @@ Have the user (in Slack):
    "@<bot-name> what's 2+2?" → it should reply in a thread.
 3. **Reply in that thread** without mentioning it → it should answer with
    context (thread memory).
+4. **React with 👀 (`:eyes:`)** on any message in a channel the bot is in →
+   it should post a summary in that message's thread. Emoji actions work out
+   of the box (✅ mark done, 🔖 save to knowledge base, 👀 summarize,
+   ❓ explain) and are customizable via the `EMOJI_ACTIONS` env var — see
+   [`bot/README.md`](bot/README.md#emoji-actions).
 
 If nothing comes back, read the function logs (`vercel logs <domain>`) — the
 usual suspects are a wrong signing secret (events rejected silently), a
 missing `ANTHROPIC_API_KEY`, or the Events URL pointing at a preview
-deployment instead of production.
+deployment instead of production. If only the reaction test fails, the app
+was created from an older manifest — add the `reaction_added` bot event
+under **Event Subscriptions** and reinstall the app.
 
-**Checkpoint:** all three interactions answered. The bot is live both ways.
+**Checkpoint:** all four interactions answered. The bot is live both ways.
 
 ## B7 — Connect tools
 
 Each tool group lights up when its env vars exist (set them with
 `vercel env add … production`, then `vercel --prod` to redeploy — envs are
-baked at deploy time). Ask the user which they want; **the knowledge base is
-the default** — offer it first.
+baked at deploy time). **Set up the knowledge base as part of this standard
+install** — it's the default connection and the reason the bot is useful on day
+one; do it before asking about the others, and only skip it if the user
+explicitly declines. Then ask which of the remaining tools they want.
 
-**Knowledge base (Google Drive) — default.** Gives the bot `kbSearch` /
-`kbReadFile` (+ `kbCreateNote` with a notes folder). Needs a Google OAuth
-client + refresh token:
+**Knowledge base (Google Drive) — the default connection, set this up.** Gives
+the bot `kbSearch` / `kbReadFile` (+ `kbCreateNote` with a notes folder). Needs
+a Google OAuth client + refresh token:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
    *(offer to drive)*: create (or reuse) a project → **OAuth client ID** →
@@ -482,6 +504,8 @@ These are the exact traps a real end-to-end setup hit — check them in order:
 - [ ] Vercel project deployed to production, `/api/health` returns `ok`
 - [ ] Slack app created from `bot/app-manifest.json`, Events URL **Verified**
 - [ ] DM answered, channel @-mention answered, thread follow-up remembered
+- [ ] 👀 reaction produced a thread summary (emoji actions live)
+- [ ] App icon uploaded (or the user explicitly skipped branding)
 - [ ] Knowledge base connected and answering from real docs (unless the user
       declined)
 - [ ] Any extra tools the user chose are live

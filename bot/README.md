@@ -21,6 +21,8 @@ git clone https://github.com/Elnora-AI/elnora-slack.git
 cd elnora-slack/bot
 vercel --yes                      # create the project
 # set envs (see .env.example): ANTHROPIC_API_KEY, REDIS_URL, BOT_NAME, …
+# connect your knowledge base (the default tool — see below):
+#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, DRIVE_ID
 # create your Slack app from app-manifest.json (fill in your deployment URL)
 # then add SLACK_BOT_TOKEN + SLACK_SIGNING_SECRET and ship:
 vercel --prod
@@ -28,7 +30,7 @@ vercel --prod
 
 Or click-first:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,DRIVE_ID)
 
 > **Pasting secrets:** when a terminal prompt (`vercel env add`, a provisioning
 > script, or a `.env` step) asks you to paste a token or secret, the terminal
@@ -48,6 +50,71 @@ Or click-first:
   [`.env.example`](.env.example).
 - `GET /api/health` for uptime monitoring; `POST /api/send` (bearer-gated by
   `SEND_API_SECRET`) lets your own automations post as the bot.
+- Every incoming message is attributed to its Slack sender, so in a busy
+  thread the agent knows exactly who asked for what and acts on that
+  person's behalf.
+
+## Knowledge base (the default connection)
+
+The bot ships to answer from **your** documents, not just its own knowledge — so
+connecting a knowledge base is the one tool you set up as part of the standard
+install, not an afterthought. It's a Google Drive shared drive (or folder): the
+bot gets `kbSearch` (full-text search over your docs), `kbReadFile` (read a
+document by ID), and `kbCreateNote` (save a markdown note back).
+
+Four env vars turn it on:
+
+| Variable | What | Where from |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` | OAuth app | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth client ID (Desktop app) |
+| `GOOGLE_CLIENT_SECRET` | OAuth app | same screen |
+| `GOOGLE_REFRESH_TOKEN` | Drive access grant | [OAuth Playground](https://developers.google.com/oauthplayground), scope `.../auth/drive` (or `GOOGLE_DRIVE_REFRESH_TOKEN` for a separate grant) |
+| `DRIVE_ID` | which drive holds the docs | the ID in `drive.google.com/drive/folders/<DRIVE_ID>` |
+
+Then optionally `NOTES_FOLDER_ID` (folder where new notes are saved — enables
+`kbCreateNote`) and `KB_NAME` (what the bot calls it, e.g. "Acme knowledge
+vault"). Enable the **Google Drive API** on the project, `vercel --prod`, and ask
+the bot in Slack to "search the knowledge base for X" to confirm. The same
+`GOOGLE_*` credentials also light up Gmail and Calendar once their scopes are on
+the token. Step-by-step (with browser-driven walkthrough) is
+[INSTALL_FOR_AGENTS.md → B7](../INSTALL_FOR_AGENTS.md#b7--connect-tools).
+
+## Emoji actions
+
+React to any message with a mapped emoji and the agent runs the action on
+your behalf — no setup needed:
+
+| Emoji | Action |
+|-------|--------|
+| ✅ `:white_check_mark:` | Mark done — closes the linked tracker issue (e.g. Linear) if the message references one |
+| 🔖 `:bookmark:` | Save the message (or the URL in it) to the knowledge base |
+| 👀 `:eyes:` | Summarize the conversation so far |
+| ❓ `:question:` | Explain the message in plain terms |
+
+Customize with the `EMOJI_ACTIONS` env var — a JSON object merged over the
+defaults. Map any emoji to any instruction, `"off"` to disable one, or set
+the whole var to `off` to disable the feature:
+
+```sh
+EMOJI_ACTIONS={"rocket":"Deploy what this message describes","eyes":"off"}
+```
+
+Unmapped emoji are ignored silently, so normal reaction culture is untouched.
+
+## Give the bot your logo
+
+Slack has no API for app icons, so this is the one manual step — 30 seconds,
+once:
+
+1. Open [api.slack.com/apps](https://api.slack.com/apps) → your app →
+   **Basic Information** → **Display Information**.
+2. Upload your logo as the **App icon** (512–2000 px square PNG) and pick a
+   background color.
+3. Save. Every message, DM and mention now shows your logo everywhere in
+   Slack — no redeploy needed.
+
+The bot's *name* is env-driven: `BOT_NAME` (persona) and the
+`display_name` in `app-manifest.json` (the @-handle).
 
 ## Safety defaults
 
