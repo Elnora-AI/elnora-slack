@@ -371,15 +371,17 @@ bot.onSlashCommand("/note", (event) =>
 	),
 );
 
-// /search — search across every connected source.
-bot.onSlashCommand("/search", (event) =>
+// /find — search across every connected source.
+// (Named /find, not /search: /search and /status are reserved Slack built-in
+// commands that no app can register.)
+bot.onSlashCommand("/find", (event) =>
 	runSlashCommand(
 		event,
 		`Search every source you can (knowledge base, web, Linear, Slack) for: ${event.text?.trim() ?? ""}`,
 	),
 );
 
-// /status — report connected-service status.
-bot.onSlashCommand("/status", (event) =>
+// /botstatus — report connected-service status.
+bot.onSlashCommand("/botstatus", (event) =>
 	runSlashCommand(event, "Run the systemStatus tool and report which services are connected, using Slack mrkdwn."),
 );

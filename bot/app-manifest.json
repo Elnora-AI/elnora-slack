@@ -30,14 +30,14 @@
         "should_escape": false
       },
       {
-        "command": "/search",
+        "command": "/find",
         "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
         "description": "Search across every connected source",
         "usage_hint": "[query]",
         "should_escape": false
       },
       {
-        "command": "/status",
+        "command": "/botstatus",
         "url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
         "description": "Show which services the bot is connected to",
         "should_escape": false
