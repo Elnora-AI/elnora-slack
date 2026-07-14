@@ -1,7 +1,7 @@
 {
   "name": "@elnora-ai/slack",
   "version": "0.1.0",
-  "description": "The entire Slack Web API as a CLI and a Claude Code plugin — 201 methods, agent-friendly JSON, approval-gated sending",
+  "description": "The entire Slack Web API as a CLI and a Claude Code plugin \u2014 201 methods, agent-friendly JSON, approval-gated sending",
   "type": "module",
   "bin": {
     "elnora-slack": "dist/main.js"
@@ -75,5 +75,10 @@
   "dependencies": {
     "@slack/web-api": "^7.15.2",
     "commander": "^15.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": ">=8.5.10"
+    }
   }
 }
