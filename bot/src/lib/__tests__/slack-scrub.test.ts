@@ -10,7 +10,7 @@ describe("scrubSlackBroadcasts", () => {
 	});
 
 	it("keeps individual user mentions", () => {
-		expect(scrubSlackBroadcasts("thanks <@U07Q5TEKRTK>!")).toBe("thanks <@U07Q5TEKRTK>!");
+		expect(scrubSlackBroadcasts("thanks <@U0XXXXXXXXX>!")).toBe("thanks <@U0XXXXXXXXX>!");
 	});
 
 	it("leaves normal text, links, and newlines alone", () => {
