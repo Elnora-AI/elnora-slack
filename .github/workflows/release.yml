@@ -30,7 +30,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
-      - run: pnpm test
+      # Build BEFORE test — the integration tests spawn dist/main.js.
       - run: pnpm build
+      - run: pnpm test
       - name: Publish to npm
         run: npm publish --access public --provenance
