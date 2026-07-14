@@ -12,7 +12,8 @@ import { z } from "zod";
  */
 
 export const exaSearch = tool({
-	description: "Neural web search via Exa. Use for finding relevant pages, companies, papers, or people by meaning, not just keywords.",
+	description:
+		"Neural web search via Exa. Use for finding relevant pages, companies, papers, or people by meaning, not just keywords.",
 	inputSchema: z.object({
 		query: z.string().max(500).describe("Search query"),
 		limit: z.number().optional().default(5).pipe(z.number().max(15)),
@@ -41,7 +42,8 @@ export const exaSearch = tool({
 });
 
 export const perplexityAsk = tool({
-	description: "Ask Perplexity a question and get a web-grounded answer with source citations. Use for current facts that need up-to-date sourcing.",
+	description:
+		"Ask Perplexity a question and get a web-grounded answer with source citations. Use for current facts that need up-to-date sourcing.",
 	inputSchema: z.object({
 		query: z.string().max(1000).describe("The question to answer"),
 		model: z.string().max(60).optional().describe("Perplexity model (default sonar)"),
@@ -70,7 +72,8 @@ export const perplexityAsk = tool({
 });
 
 export const valyuSearch = tool({
-	description: "Search Valyu for grounded knowledge — academic papers, financial/SEC data, clinical/biomedical sources. Use for citations-grade research.",
+	description:
+		"Search Valyu for grounded knowledge — academic papers, financial/SEC data, clinical/biomedical sources. Use for citations-grade research.",
 	inputSchema: z.object({
 		query: z.string().max(500).describe("Search query"),
 		limit: z.number().optional().default(5).pipe(z.number().max(15)),

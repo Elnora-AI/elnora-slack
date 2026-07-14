@@ -13,8 +13,8 @@ import * as gmail from "./gmail";
 import * as kb from "./knowledge-base";
 import * as linear from "./linear";
 import * as slack from "./slack";
-import * as web from "./web-search";
 import * as webProviders from "./web-providers";
+import * as web from "./web-search";
 
 export interface ToolGroup {
 	key: string;
