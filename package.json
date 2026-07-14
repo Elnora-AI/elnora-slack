@@ -37,9 +37,9 @@
     "generate": "tsx src/generate.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "biome check src/ __tests__/",
-    "lint:fix": "biome check --write src/ __tests__/",
-    "format": "biome format --write src/ __tests__/",
+    "lint": "biome check src/ __tests__/ bot/src/",
+    "lint:fix": "biome check --write src/ __tests__/ bot/src/",
+    "format": "biome format --write src/ __tests__/ bot/src/",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

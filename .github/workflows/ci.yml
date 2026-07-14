@@ -30,6 +30,21 @@ jobs:
       - run: pnpm build
       - run: pnpm test
 
+  bot:
+    name: Bot template
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter slack-bot-template typecheck
+      - run: pnpm --filter slack-bot-template test
+      - run: pnpm --filter slack-bot-template build
+
   build:
     name: Build (${{ matrix.os }})
     needs: lint-and-test

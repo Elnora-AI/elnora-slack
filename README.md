@@ -13,6 +13,7 @@ What you can do in your first ten minutes:
 - Keep a **cached workspace reference** (users, channels, routing) so agents resolve names to IDs without an API round-trip.
 - Wire up **scheduled alerting** — notify-on-failure DMs, weekly digests, log-sweep alerts — from the bundled templates.
 - One-line plugin install in Claude Code: `/plugin marketplace add Elnora-AI/elnora-slack`.
+- Deploy the **two-way bot**: an AI assistant your whole workspace can DM or @-mention, with thread memory and pluggable tools (knowledge base, Linear, Gmail, web search) — see [the bot template](bot/).
 
 > **The binary is `elnora-slack`, not `slack`.** Slack ships its own official `slack` CLI; we deliberately don't shadow it.
 
@@ -130,6 +131,17 @@ The plugin keeps a small cache of your users and channels so agents resolve name
 - **Nothing leaves your machine** except requests to Slack's own API.
 
 Full details in [SAFETY.md](SAFETY.md).
+
+---
+
+## The two-way bot
+
+Everything above is one-way: your terminal agent acting on Slack. The [`bot/`](bot/) directory ships the other direction — a deployable Next.js app (Vercel) that answers **incoming** Slack messages with an AI agent:
+
+- **Org-wide by default** — anyone in the workspace can DM it or @-mention it in a channel; it replies in threads and remembers the conversation (Redis).
+- **Pluggable tools, zero hardcoding** — knowledge base on Google Drive (default), Linear, Gmail, Calendar, web search, Slack history search; each switches on by env var. Adding ClickUp/Monday/anything is a ~50-line recipe.
+- **Safe by default** — broadcast-ping scrubbing, approval-gated sends, prompt-injection guardrails.
+- **Guided setup** — [Part B of INSTALL_FOR_AGENTS.md](INSTALL_FOR_AGENTS.md#part-b--the-two-way-bot-optional) walks an AI agent through Vercel CLI, the Slack app manifest, env wiring, and live smoke tests.
 
 ---
 
