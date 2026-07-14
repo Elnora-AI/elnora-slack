@@ -14,6 +14,7 @@ import * as kb from "./knowledge-base";
 import * as linear from "./linear";
 import * as slack from "./slack";
 import * as web from "./web-search";
+import * as webProviders from "./web-providers";
 
 export interface ToolGroup {
 	key: string;
@@ -85,11 +86,32 @@ export function toolGroups(): ToolGroup[] {
 		},
 		{
 			key: "web-search",
-			label: "Web search",
+			label: "Web search (Tavily)",
 			promptHint:
 				"Search the web and extract page content (`webSearch`, `webExtract`) for current information not in internal sources.",
 			enabled: !!process.env.TAVILY_API_KEY,
 			tools: { ...web },
+		},
+		{
+			key: "exa",
+			label: "Exa search",
+			promptHint: "Neural web search by meaning (`exaSearch`) — finds relevant pages, companies, papers, people.",
+			enabled: !!process.env.EXA_API_KEY,
+			tools: { exaSearch: webProviders.exaSearch },
+		},
+		{
+			key: "perplexity",
+			label: "Perplexity",
+			promptHint: "Web-grounded answers with citations (`perplexityAsk`) for current facts that need sourcing.",
+			enabled: !!process.env.PERPLEXITY_API_KEY,
+			tools: { perplexityAsk: webProviders.perplexityAsk },
+		},
+		{
+			key: "valyu",
+			label: "Valyu",
+			promptHint: "Citations-grade research search (`valyuSearch`) — academic, financial/SEC, clinical/biomedical.",
+			enabled: !!process.env.VALYU_API_KEY,
+			tools: { valyuSearch: webProviders.valyuSearch },
 		},
 		{
 			key: "system",

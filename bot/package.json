@@ -25,7 +25,9 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "redis": "^5.5.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@ai-sdk/openai": "^2.0.0",
+    "@ai-sdk/google": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",

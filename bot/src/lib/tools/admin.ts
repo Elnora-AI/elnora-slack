@@ -32,7 +32,10 @@ export const systemStatus = tool({
 		checks.gmail = process.env.GOOGLE_REFRESH_TOKEN ? "ok" : "not configured";
 		checks.calendar = process.env.GOOGLE_REFRESH_TOKEN ? "ok" : "not configured";
 		checks.slackSearch = process.env.SLACK_USER_TOKEN ? "ok" : "not configured";
-		checks.webSearch = process.env.TAVILY_API_KEY ? "ok" : "not configured";
+		checks.webSearchTavily = process.env.TAVILY_API_KEY ? "ok" : "not configured";
+		checks.exa = process.env.EXA_API_KEY ? "ok" : "not configured";
+		checks.perplexity = process.env.PERPLEXITY_API_KEY ? "ok" : "not configured";
+		checks.valyu = process.env.VALYU_API_KEY ? "ok" : "not configured";
 		checks.conversationMemory = process.env.REDIS_URL ? "ok" : "not configured";
 
 		return { services: checks };
