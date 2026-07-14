@@ -1,0 +1,56 @@
+{
+  "display_information": {
+    "name": "AI Agent",
+    "description": "Two-way AI assistant for this workspace — DM it or @-mention it in any channel.",
+    "background_color": "#1a1d21"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "ai-agent",
+      "always_online": true
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "groups:history",
+        "groups:read",
+        "im:history",
+        "im:read",
+        "im:write",
+        "mpim:history",
+        "mpim:read",
+        "reactions:read",
+        "reactions:write",
+        "users:read"
+      ],
+      "user": [
+        "search:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack",
+      "bot_events": [
+        "app_mention",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim",
+        "member_joined_channel"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://YOUR-DEPLOYMENT.vercel.app/api/webhooks/slack"
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}
