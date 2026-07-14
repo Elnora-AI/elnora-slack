@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.0...v0.1.1) (2026-07-14)
+
+
+### Features
+
+* **bot:** deployable two-way Slack AI agent template ([#8](https://github.com/Elnora-AI/elnora-slack/issues/8)) ([ce15bf8](https://github.com/Elnora-AI/elnora-slack/commit/ce15bf81ce9ebea834506d75889a335e7d87c4b3))
+
+
+### Bug Fixes
+
+* **deps:** force postcss &gt;=8.5.10 (CVE-2026-41305) ([#9](https://github.com/Elnora-AI/elnora-slack/issues/9)) ([7b6b0d0](https://github.com/Elnora-AI/elnora-slack/commit/7b6b0d0cbffa337d53cfdc302a28e9d1ed3acc58))
+
 ## 0.1.0
 
 Initial release.
