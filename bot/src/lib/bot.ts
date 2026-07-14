@@ -15,6 +15,7 @@
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { createRedisState } from "@chat-adapter/state-redis";
+import { WebClient } from "@slack/web-api";
 import { Chat } from "chat";
 import { agent } from "./agent";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
@@ -79,23 +80,14 @@ async function handleMessage(
 
 	await thread.startTyping();
 
-	// Load conversation history from thread state
-	const threadState = await thread.state;
-	const history = threadState?.history ?? [];
-
 	const userText = (message.text ?? "").slice(0, MAX_MSG_LENGTH);
 
-	// Build messages for the agent — filter out any empty content entries
-	// that could have been stored from previous failed API calls.
-	const messages = [
-		...history
-			.filter((m) => m.content)
-			.map((m) => ({
-				role: m.role as "user" | "assistant",
-				content: m.content,
-			})),
-		{ role: "user" as const, content: userText },
-	];
+	// Load conversation context LIVE from Slack. Thread state is in-memory on
+	// Vercel serverless and doesn't survive across invocations, so it can't be
+	// the memory. Instead we read the actual thread replies (or recent channel/
+	// DM history) from Slack each time — real memory, no Redis required.
+	const context = await fetchSlackContext(thread, message);
+	const messages = [...context, { role: "user" as const, content: userText }];
 
 	try {
 		// Generate the full response, then post it. Streaming via thread.post
@@ -120,23 +112,8 @@ async function handleMessage(
 				console.error("Failed to post empty-result placeholder to Slack:", postErr);
 			}
 		}
-
-		// Persist conversation — keep last 20 messages (slice to 18 + 2 new = 20).
-		// Skip persisting if the assistant response is empty — avoids poisoning
-		// history with empty content that the model API rejects on later calls.
-		if (assistantText) {
-			try {
-				await thread.setState({
-					history: [
-						...history.slice(-18),
-						{ role: "user", content: userText },
-						{ role: "assistant", content: assistantText },
-					],
-				});
-			} catch (stateErr) {
-				console.error("Failed to persist thread state:", stateErr);
-			}
-		}
+		// No thread-state write needed — context is read live from Slack on each
+		// message (see fetchSlackContext), so there is nothing to persist.
 	} catch (err) {
 		console.error("Agent error:", err);
 		// Post a generic error to Slack — never leak internal error details
@@ -145,6 +122,102 @@ async function handleMessage(
 		} catch {
 			console.error("Failed to post error message to Slack");
 		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Self-mention detection (double-reply guard)
+// ---------------------------------------------------------------------------
+
+// A channel message that @-mentions the bot is delivered by Slack as BOTH an
+// `app_mention` event (→ onNewMention) AND a `message.channels` event
+// (→ onSubscribedMessage). In serverless, those are separate invocations, so
+// in-memory dedup can't catch them — instead onSubscribedMessage skips any
+// message that mentions the bot, letting onNewMention own it. Non-mention
+// follow-ups in a subscribed thread still flow through onSubscribedMessage.
+let _botUserId: string | null = null;
+let _botUserIdFetched = false;
+async function getBotUserId(): Promise<string | null> {
+	if (_botUserIdFetched) return _botUserId;
+	_botUserIdFetched = true;
+	const token = process.env.SLACK_BOT_TOKEN;
+	if (!token) return null;
+	try {
+		const res = await new WebClient(token, { timeout: 5_000 }).auth.test();
+		_botUserId = (res.user_id as string) ?? null;
+	} catch {
+		_botUserId = null;
+	}
+	return _botUserId;
+}
+
+async function mentionsBot(text: string | undefined): Promise<boolean> {
+	const id = await getBotUserId();
+	return !!id && !!text && text.includes(`<@${id}>`);
+}
+
+// ---------------------------------------------------------------------------
+// Live conversation context
+// ---------------------------------------------------------------------------
+
+/** How many prior messages to pull in for context. */
+const CONTEXT_LIMIT = 15;
+
+/**
+ * Read the recent conversation straight from Slack so the agent has real
+ * memory without depending on persisted thread state (which doesn't survive
+ * serverless cold starts). In a thread we read the thread replies; otherwise
+ * we read the channel/DM's recent history. The bot's own messages become
+ * `assistant` turns, everyone else's become `user` turns.
+ */
+async function fetchSlackContext(
+	thread: Parameters<Parameters<typeof bot.onNewMention>[0]>[0],
+	message: Parameters<Parameters<typeof bot.onNewMention>[0]>[1],
+): Promise<Array<{ role: "user" | "assistant"; content: string }>> {
+	const token = process.env.SLACK_BOT_TOKEN;
+	if (!token) return [];
+
+	const t = thread as unknown as Record<string, unknown>;
+	const m = message as unknown as Record<string, unknown>;
+
+	// Resolve the channel id from the thread (id field or the "slack:C…:ts" key).
+	let channelId = (t.channel as { id?: string } | undefined)?.id;
+	if (!channelId) {
+		for (const v of [t.threadId, t.id]) {
+			if (typeof v === "string") {
+				const mt = v.match(/^slack:([^:]+)/);
+				if (mt) {
+					channelId = mt[1];
+					break;
+				}
+			}
+		}
+	}
+	if (!channelId) return [];
+
+	const raw = (m.raw ?? {}) as { thread_ts?: string; ts?: string };
+	const client = new WebClient(token, { timeout: 8_000 });
+
+	try {
+		let msgs: Array<{ user?: string; bot_id?: string; text?: string; ts?: string }> = [];
+		if (raw.thread_ts) {
+			const res = await client.conversations.replies({ channel: channelId, ts: raw.thread_ts, limit: CONTEXT_LIMIT });
+			msgs = (res.messages ?? []) as typeof msgs;
+		} else {
+			const res = await client.conversations.history({ channel: channelId, limit: CONTEXT_LIMIT });
+			msgs = ((res.messages ?? []) as typeof msgs).reverse();
+		}
+
+		const botId = await getBotUserId();
+		return msgs
+			.filter((x) => x.text && x.ts !== raw.ts)
+			.map((x) => ({
+				role: (botId && x.user === botId) || x.bot_id ? ("assistant" as const) : ("user" as const),
+				content: (x.text as string).slice(0, MAX_MSG_LENGTH),
+			}));
+	} catch (err) {
+		console.error("Failed to fetch Slack context:", err instanceof Error ? err.name : "unknown");
+		return [];
 	}
 }
 
@@ -158,8 +231,12 @@ bot.onNewMention(async (thread, message) => {
 	await handleMessage(thread, message);
 });
 
-// Follow-up messages in subscribed threads (channel threads the bot is part of)
+// Follow-up messages in subscribed threads (channel threads the bot is part of).
+// Skip messages that mention the bot — those also fire app_mention and are
+// handled by onNewMention, so processing here too would double-reply.
 bot.onSubscribedMessage(async (thread, message) => {
+	if (message.author.isBot) return;
+	if (await mentionsBot(message.text)) return;
 	await handleMessage(thread, message);
 });
 
