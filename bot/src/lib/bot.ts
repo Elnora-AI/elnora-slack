@@ -15,6 +15,7 @@
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { createRedisState } from "@chat-adapter/state-redis";
+import { WebClient } from "@slack/web-api";
 import { Chat } from "chat";
 import { agent } from "./agent";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
@@ -149,6 +150,37 @@ async function handleMessage(
 }
 
 // ---------------------------------------------------------------------------
+// Self-mention detection (double-reply guard)
+// ---------------------------------------------------------------------------
+
+// A channel message that @-mentions the bot is delivered by Slack as BOTH an
+// `app_mention` event (→ onNewMention) AND a `message.channels` event
+// (→ onSubscribedMessage). In serverless, those are separate invocations, so
+// in-memory dedup can't catch them — instead onSubscribedMessage skips any
+// message that mentions the bot, letting onNewMention own it. Non-mention
+// follow-ups in a subscribed thread still flow through onSubscribedMessage.
+let _botUserId: string | null = null;
+let _botUserIdFetched = false;
+async function getBotUserId(): Promise<string | null> {
+	if (_botUserIdFetched) return _botUserId;
+	_botUserIdFetched = true;
+	const token = process.env.SLACK_BOT_TOKEN;
+	if (!token) return null;
+	try {
+		const res = await new WebClient(token, { timeout: 5_000 }).auth.test();
+		_botUserId = (res.user_id as string) ?? null;
+	} catch {
+		_botUserId = null;
+	}
+	return _botUserId;
+}
+
+async function mentionsBot(text: string | undefined): Promise<boolean> {
+	const id = await getBotUserId();
+	return !!id && !!text && text.includes(`<@${id}>`);
+}
+
+// ---------------------------------------------------------------------------
 // Event handlers
 // ---------------------------------------------------------------------------
 
@@ -158,8 +190,12 @@ bot.onNewMention(async (thread, message) => {
 	await handleMessage(thread, message);
 });
 
-// Follow-up messages in subscribed threads (channel threads the bot is part of)
+// Follow-up messages in subscribed threads (channel threads the bot is part of).
+// Skip messages that mention the bot — those also fire app_mention and are
+// handled by onNewMention, so processing here too would double-reply.
 bot.onSubscribedMessage(async (thread, message) => {
+	if (message.author.isBot) return;
+	if (await mentionsBot(message.text)) return;
 	await handleMessage(thread, message);
 });
 
