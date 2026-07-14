@@ -432,16 +432,46 @@ PRing genuinely reusable ones back to
 
 ## B9 — Troubleshooting
 
-- **Bot never replies** → `vercel logs`; check Events URL points at
-  *production*, signing secret matches, and the app was reinstalled after any
-  scope change.
+These are the exact traps a real end-to-end setup hit — check them in order:
+
+- **`ANTHROPIC_API_KEY` won't set via `vercel env add`** (silently fails, absent
+  from `vercel env ls`) → on teams with Vercel AI Gateway enabled, that name is
+  reserved. Add it through the **Vercel dashboard** (Project → Settings →
+  Environment Variables → Add), not the CLI. Redeploy after.
+- **Request URL shows "Verified" then flips to "didn't respond"** → the
+  verification was never **Saved**. On the Event Subscriptions page, after it
+  shows Verified, the change must be committed (the manifest editor's Save can
+  re-trigger verification and drop it). Verify the deployment itself is fine
+  first: `curl -s https://<domain>/api/health` should show `slack_signing: ok`,
+  and a correctly-signed challenge returns HTTP 200 echoing the challenge.
+- **URL verified but bot still silent** → open the **"Subscribe to bot events"**
+  section (it's collapsed by default) and confirm `app_mention`, `message.im`,
+  `message.channels/groups/mpim`, `member_joined_channel` are listed. No events
+  subscribed = Slack sends nothing.
+- **`SLACK_SIGNING_SECRET` / `SLACK_BOT_TOKEN` mispasted** → the signing secret
+  is a **32-char hex** (e.g. `43ffdf…`), the bot token starts **`xoxb-`**, the
+  user token starts **`xoxp-`**. It's easy to paste the wrong one (terminal
+  hidden input shows nothing). If verification fails or replies fail, re-set the
+  value from the Slack app's Basic Information / OAuth page via the Vercel
+  dashboard and **look at it** before saving.
+- **`cannot_dm_bot` / app not in the Apps sidebar** → the bot's **Messages Tab**
+  is off. Enable `features.app_home.messages_tab_enabled: true` (the template
+  manifest does this) and **Reinstall the app** (Install App → Reinstall).
+- **You're testing by posting with a bot token** → a bot ignores bot-authored
+  messages (`isBot` guard), so it looks broken. Test with a **real human
+  message** (DM the bot, or @-mention it as yourself), not a token-posted one.
+- **Two bots answer / the wrong bot answers** → another app in the workspace
+  subscribes to `message.channels` and is in the same channel. Test in a channel
+  with only your bot, or DM it.
+- **Bot never replies (after the above)** → `vercel logs <domain>`; check Events
+  URL points at *production*, and the app was reinstalled after any scope change.
 - **Replies cut off / first reply works then silence** → function timeout.
   The route asks for `maxDuration: 300`; on the Hobby plan enable fluid
   compute or upgrade — long tool chains need the headroom.
 - **"Sorry, I'm not configured to assist you"** → `ALLOWED_SLACK_USER_IDS` is
   set and doesn't include that user. Unset it (or add them) + redeploy.
 - **Thread forgets context** → no `REDIS_URL`; in-memory state only survives
-  warm starts. Add Upstash.
+  warm starts. Add Upstash (free tier).
 - **Tool says "not configured"** → its env var isn't on *production*, or you
   forgot to redeploy after adding it. `vercel env ls` then `vercel --prod`.
 - **Slack shows "dispatch_failed"** on events → the deployment is erroring
