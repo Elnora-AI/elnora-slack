@@ -45,6 +45,7 @@ describe("tool registry gating", () => {
 		expect(tools).toHaveProperty("linearListTeams");
 		expect(tools).toHaveProperty("linearCreateIssue");
 		expect(tools).toHaveProperty("linearSearchIssues");
+		expect(tools).toHaveProperty("linearRecentIssues");
 	});
 
 	it("TAVILY_API_KEY enables web search", () => {
