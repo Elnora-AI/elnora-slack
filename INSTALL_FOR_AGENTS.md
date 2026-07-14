@@ -312,7 +312,13 @@ manifest, plus Events API config).
      webhook route answers it automatically. If validation runs before your
      deploy finished, retry after B5.
 3. **Install to Workspace** → **Allow**.
-4. Collect two values (user pastes them straight into the env prompts, never
+4. **Brand it** *(offer to drive)*: still in the app config, go to **Basic
+   Information → Display Information** and upload the org's logo as the
+   **App icon** (512–2000 px square PNG) plus a background color. Slack has
+   no API for this — it's the one manual branding step, and every message
+   the bot sends will carry the logo from then on. Ask the user for the logo
+   file if you don't have it; skipping is fine, it can be added anytime.
+5. Collect two values (user pastes them straight into the env prompts, never
    the chat):
 
    ```sh
@@ -355,13 +361,20 @@ Have the user (in Slack):
    "@<bot-name> what's 2+2?" → it should reply in a thread.
 3. **Reply in that thread** without mentioning it → it should answer with
    context (thread memory).
+4. **React with 👀 (`:eyes:`)** on any message in a channel the bot is in →
+   it should post a summary in that message's thread. Emoji actions work out
+   of the box (✅ mark done, 🔖 save to knowledge base, 👀 summarize,
+   ❓ explain) and are customizable via the `EMOJI_ACTIONS` env var — see
+   [`bot/README.md`](bot/README.md#emoji-actions).
 
 If nothing comes back, read the function logs (`vercel logs <domain>`) — the
 usual suspects are a wrong signing secret (events rejected silently), a
 missing `ANTHROPIC_API_KEY`, or the Events URL pointing at a preview
-deployment instead of production.
+deployment instead of production. If only the reaction test fails, the app
+was created from an older manifest — add the `reaction_added` bot event
+under **Event Subscriptions** and reinstall the app.
 
-**Checkpoint:** all three interactions answered. The bot is live both ways.
+**Checkpoint:** all four interactions answered. The bot is live both ways.
 
 ## B7 — Connect tools
 
@@ -482,6 +495,8 @@ These are the exact traps a real end-to-end setup hit — check them in order:
 - [ ] Vercel project deployed to production, `/api/health` returns `ok`
 - [ ] Slack app created from `bot/app-manifest.json`, Events URL **Verified**
 - [ ] DM answered, channel @-mention answered, thread follow-up remembered
+- [ ] 👀 reaction produced a thread summary (emoji actions live)
+- [ ] App icon uploaded (or the user explicitly skipped branding)
 - [ ] Knowledge base connected and answering from real docs (unless the user
       declined)
 - [ ] Any extra tools the user chose are live

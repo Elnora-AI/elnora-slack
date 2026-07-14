@@ -48,6 +48,46 @@ Or click-first:
   [`.env.example`](.env.example).
 - `GET /api/health` for uptime monitoring; `POST /api/send` (bearer-gated by
   `SEND_API_SECRET`) lets your own automations post as the bot.
+- Every incoming message is attributed to its Slack sender, so in a busy
+  thread the agent knows exactly who asked for what and acts on that
+  person's behalf.
+
+## Emoji actions
+
+React to any message with a mapped emoji and the agent runs the action on
+your behalf — no setup needed:
+
+| Emoji | Action |
+|-------|--------|
+| ✅ `:white_check_mark:` | Mark done — closes the linked tracker issue (e.g. Linear) if the message references one |
+| 🔖 `:bookmark:` | Save the message (or the URL in it) to the knowledge base |
+| 👀 `:eyes:` | Summarize the conversation so far |
+| ❓ `:question:` | Explain the message in plain terms |
+
+Customize with the `EMOJI_ACTIONS` env var — a JSON object merged over the
+defaults. Map any emoji to any instruction, `"off"` to disable one, or set
+the whole var to `off` to disable the feature:
+
+```sh
+EMOJI_ACTIONS={"rocket":"Deploy what this message describes","eyes":"off"}
+```
+
+Unmapped emoji are ignored silently, so normal reaction culture is untouched.
+
+## Give the bot your logo
+
+Slack has no API for app icons, so this is the one manual step — 30 seconds,
+once:
+
+1. Open [api.slack.com/apps](https://api.slack.com/apps) → your app →
+   **Basic Information** → **Display Information**.
+2. Upload your logo as the **App icon** (512–2000 px square PNG) and pick a
+   background color.
+3. Save. Every message, DM and mention now shows your logo everywhere in
+   Slack — no redeploy needed.
+
+The bot's *name* is env-driven: `BOT_NAME` (persona) and the
+`display_name` in `app-manifest.json` (the @-handle).
 
 ## Safety defaults
 
