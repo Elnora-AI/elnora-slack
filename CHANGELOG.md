@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.3](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.2...v0.1.3) (2026-07-14)
+
+
+### Features
+
+* **bot:** any-LLM provider + Exa/Perplexity/Valyu search ([#19](https://github.com/Elnora-AI/elnora-slack/issues/19)) ([4211a67](https://github.com/Elnora-AI/elnora-slack/commit/4211a677d30a239303ac20486699f0f4bb241273))
+* **bot:** slash commands (/ask /note /search /status) ([#20](https://github.com/Elnora-AI/elnora-slack/issues/20)) ([022f5c6](https://github.com/Elnora-AI/elnora-slack/commit/022f5c6a3b2007f43b6ece7481a458efab998279))
+
+
+### Bug Fixes
+
+* **bot:** correctness — no double-reply + live conversation memory ([#18](https://github.com/Elnora-AI/elnora-slack/issues/18)) ([2905c92](https://github.com/Elnora-AI/elnora-slack/commit/2905c92a0da5c7723614c1d4bbfb639986726ad1))
+* **bot:** log only error type in /api/send (js/log-injection [#2](https://github.com/Elnora-AI/elnora-slack/issues/2)) ([#17](https://github.com/Elnora-AI/elnora-slack/issues/17)) ([20ec6a0](https://github.com/Elnora-AI/elnora-slack/commit/20ec6a06a2c8cfaa7c2b3c295362d03f139f1445))
+* **bot:** pin chat SDK to 4.32.0 — 4.34.0 breaks Slack signature verify ([#16](https://github.com/Elnora-AI/elnora-slack/issues/16)) ([d0bb350](https://github.com/Elnora-AI/elnora-slack/commit/d0bb3507c507ed2e8f0473f7e567874e15a5947b))
+* **bot:** sanitize error detail before logging in /api/send ([#14](https://github.com/Elnora-AI/elnora-slack/issues/14)) ([97650ea](https://github.com/Elnora-AI/elnora-slack/commit/97650ea5c52719b02ec0847a269cc7f05cffa852))
+* **bot:** sanitize error detail before logging in /api/send ([#21](https://github.com/Elnora-AI/elnora-slack/issues/21)) ([fdd6cd8](https://github.com/Elnora-AI/elnora-slack/commit/fdd6cd893bf6bcf60c6f34a2780aa391848af7d1))
+
 ## [0.1.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.1...v0.1.2) (2026-07-14)
 
 

@@ -11,7 +11,7 @@
       "name": "slack-workspace",
       "description": "The entire Slack Web API for Claude Code — 201 methods, approval-gated sending, a cached workspace reference, and scheduled-job alerting.",
       "source": "./",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "category": "productivity",
       "tags": [
         "slack",
