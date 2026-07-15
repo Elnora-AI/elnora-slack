@@ -9,6 +9,45 @@ history search.
 **Nothing org-specific is hardcoded.** Identity, persona, access, and tools
 are all environment variables — the same code serves any org.
 
+## Requirements
+
+Everything the bot needs, in one place. Full env reference: [`.env.example`](.env.example).
+
+**Always needed**
+
+| Dependency | What / how |
+|---|---|
+| **Vercel account** | Hosts the Next.js app (root directory `bot/`). The webhook runs with `maxDuration=300`, so the project must have **Fluid Compute enabled** (free; default on new projects) or be on **Vercel Pro** — otherwise long agent replies hit the Hobby timeout and cut off. |
+| **Vercel CLI** | `npm i -g vercel` (used to deploy and set env vars). |
+| **Node.js ≥ 20.9.0** | For the CLI, local build, and tests (`engines` in `package.json`). |
+| **An LLM API key** | Anthropic by default → `ANTHROPIC_API_KEY`. To use another provider set `LLM_PROVIDER=openai` (`OPENAI_API_KEY`) or `LLM_PROVIDER=google` (`GOOGLE_GENERATIVE_AI_API_KEY`). Exactly one provider key is required; override the model with `BOT_MODEL`. |
+| **A Slack app** | Created from [`app-manifest.json`](app-manifest.json) → gives `SLACK_BOT_TOKEN` (`xoxb-`) + `SLACK_SIGNING_SECRET`. The manifest's `channels:history` / `groups:history` / `im:history` / `mpim:history` scopes are what make live thread/DM memory work — don't remove them. It also registers the events and the `/ask`, `/note`, `/find`, `/botstatus` slash commands. |
+
+**Strongly recommended**
+
+| Dependency | What / how |
+|---|---|
+| **Redis** (`REDIS_URL`) | Persists thread subscriptions across serverless cold starts. One-click via the **Vercel Marketplace / Storage** tab (Upstash or Redis Cloud), which injects `REDIS_URL` (plus `KV_URL` / `KV_REST_API_*`) — no secret to copy. Or bring your own from [Upstash](https://upstash.com) (free tier). Without it the bot still answers, but falls back to live participation detection for un-mentioned channel replies. |
+
+**Default tool — knowledge base (Google Drive)** — the bot ships to answer from *your* docs; set this up in the same pass:
+
+| Dependency | What / how |
+|---|---|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud OAuth client (Desktop app). |
+| `GOOGLE_REFRESH_TOKEN` | Drive grant. **This same token also enables Gmail + Calendar** once their scopes are on it. (`GOOGLE_DRIVE_REFRESH_TOKEN` is a Drive-*only* alternative that powers the KB but **not** Gmail/Calendar.) |
+| `DRIVE_ID` (+ optional `NOTES_FOLDER_ID`) | Which drive holds the docs; the folder for saved notes. Enable the **Google Drive API** on the project. |
+
+**Optional tools** — each lights up on its own env var (source of truth: [`src/lib/tools/index.ts`](src/lib/tools/index.ts)):
+
+| Capability | Env var |
+|---|---|
+| Linear (create/update/search issues) | `LINEAR_API_KEY` |
+| Web search — Tavily | `TAVILY_API_KEY` |
+| Web search — Exa (neural) | `EXA_API_KEY` |
+| Web search — Perplexity (grounded answers) | `PERPLEXITY_API_KEY` |
+| Web search — Valyu (citations-grade research) | `VALYU_API_KEY` |
+| Slack message search | `SLACK_USER_TOKEN` (`xoxp-` with `search:read`) |
+
 ## Quick start
 
 The full guided runbook (built for AI agents to walk you through) is
@@ -42,7 +81,9 @@ Or click-first:
 - `POST /api/webhooks/slack` receives Slack Events API calls (mentions, DMs,
   thread replies) via the [chat SDK](https://www.npmjs.com/package/chat) and
   answers them with an [AI SDK](https://ai-sdk.dev) tool-loop agent
-  (`claude-sonnet-5` by default).
+  (`claude-sonnet-5` by default). The route runs with `maxDuration=300`, so the
+  Vercel project needs **Fluid Compute** enabled (or Pro) — otherwise long tool
+  chains hit the Hobby timeout and the reply cuts off.
 - Conversation memory is read **live from Slack** on every message — the bot
   pulls the thread's replies (or the channel/DM's recent history) each time, so
   it always has the full context. It answers follow-ups in any thread it's part
@@ -82,15 +123,16 @@ Four env vars turn it on:
 |---|---|---|
 | `GOOGLE_CLIENT_ID` | OAuth app | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth client ID (Desktop app) |
 | `GOOGLE_CLIENT_SECRET` | OAuth app | same screen |
-| `GOOGLE_REFRESH_TOKEN` | Drive access grant | [OAuth Playground](https://developers.google.com/oauthplayground), scope `.../auth/drive` (or `GOOGLE_DRIVE_REFRESH_TOKEN` for a separate grant) |
+| `GOOGLE_REFRESH_TOKEN` | Drive access grant (also enables Gmail + Calendar) | [OAuth Playground](https://developers.google.com/oauthplayground), scope `.../auth/drive`. `GOOGLE_DRIVE_REFRESH_TOKEN` is a Drive-*only* alternative — it powers the KB but **not** Gmail/Calendar. |
 | `DRIVE_ID` | which drive holds the docs | the ID in `drive.google.com/drive/folders/<DRIVE_ID>` |
 
 Then optionally `NOTES_FOLDER_ID` (folder where new notes are saved — enables
 `kbCreateNote`) and `KB_NAME` (what the bot calls it, e.g. "Acme knowledge
 vault"). Enable the **Google Drive API** on the project, `vercel --prod`, and ask
-the bot in Slack to "search the knowledge base for X" to confirm. The same
-`GOOGLE_*` credentials also light up Gmail and Calendar once their scopes are on
-the token. Step-by-step (with browser-driven walkthrough) is
+the bot in Slack to "search the knowledge base for X" to confirm. The
+`GOOGLE_REFRESH_TOKEN` also lights up Gmail and Calendar once their scopes are on
+the token (the Drive-only `GOOGLE_DRIVE_REFRESH_TOKEN` does not). Step-by-step
+(with browser-driven walkthrough) is
 [INSTALL_FOR_AGENTS.md → B7](../INSTALL_FOR_AGENTS.md#b7--connect-tools).
 
 ## Emoji actions
