@@ -265,7 +265,7 @@ Full reference: [`bot/.env.example`](bot/.env.example). Minimum to boot:
 | `ANTHROPIC_API_KEY` | pays for the model | console.anthropic.com |
 | `SLACK_BOT_TOKEN` | bot identity (`xoxb-…`) | created in B4 — set after |
 | `SLACK_SIGNING_SECRET` | verifies events are from Slack | created in B4 — set after |
-| `REDIS_URL` | thread memory across invocations | free at upstash.com — strongly recommended |
+| `REDIS_URL` | persists thread subscriptions across cold starts | one-click via Vercel Storage (below) — strongly recommended |
 
 Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
 `SYSTEM_PROMPT_APPEND` for org-specific instructions. Model defaults to
@@ -293,6 +293,22 @@ vercel env add BOT_NAME production
 > Enter, and trust it landed. Do not paste twice (that doubles the value) and
 > do not retype it. This applies to `vercel env add`, the `provision*` scripts,
 > and the `.env` steps in Part A.
+
+### Redis in one click (no secret handling)
+
+The cleanest way to set `REDIS_URL` is the **Vercel Marketplace**, which injects
+the connection string for you — nobody copies a secret:
+
+1. Vercel dashboard → the bot's project → **Storage** → **Create Database** →
+   pick a Redis / Upstash KV store (or **Connect** an existing team store).
+2. Choose the **Production** (and Preview) environments and connect.
+
+Vercel then adds `REDIS_URL` (plus `KV_URL` / `KV_REST_API_*`) to the project
+automatically. The bot reads `REDIS_URL`; the others are harmless. Because each
+deployment namespaces its keys with `BOT_STATE_PREFIX` (default
+`slack-agent-bot`), **one store can be shared across bots** without collisions.
+Redeploy after connecting so the running build picks up the new env var, then
+confirm `GET /api/health` shows `redis: { ok: true }`.
 
 **Access control:** by default **everyone in the workspace** can use the bot —
 that's the point of an org bot, and the signing secret guarantees events only
@@ -373,6 +389,16 @@ Have the user (in Slack):
    of the box (✅ mark done, 🔖 save to knowledge base, 👀 summarize,
    ❓ explain) and are customizable via the `EMOJI_ACTIONS` env var — see
    [`bot/README.md`](bot/README.md#emoji-actions).
+5. **Run a slash command**: `/ask what can you do?` → the bot echoes your
+   command back to the channel (so you see what you asked) and then answers.
+   The manifest registers `/ask`, `/note`, `/find`, `/botstatus`. (`/search`
+   and `/status` are reserved Slack built-ins no app can register — that's why
+   they're `/find` and `/botstatus`.)
+6. **Ask for the latest of something**: `/find the newest issue in Linear` or
+   "what's the newest note in the knowledge base?" → it uses the recency tools
+   (`linearRecentIssues`, `kbRecentNotes`) and returns the actual most-recent
+   item with its date, not an arbitrary keyword match. Date filters
+   ("issues since Monday", "notes from June") work too.
 
 If nothing comes back, read the function logs (`vercel logs <domain>`) — the
 usual suspects are a wrong signing secret (events rejected silently), a
@@ -381,7 +407,14 @@ deployment instead of production. If only the reaction test fails, the app
 was created from an older manifest — add the `reaction_added` bot event
 under **Event Subscriptions** and reinstall the app.
 
-**Checkpoint:** all four interactions answered. The bot is live both ways.
+**If the bot replies but says it "has no prior context"**, its context read
+from Slack failed — grep the logs for `slack.context: fetch failed` and read
+the `error` code. `missing_scope` means the app needs `channels:history` /
+`groups:history` / `im:history` / `mpim:history` (in the manifest — reinstall
+after adding); `not_in_channel` means invite the bot to that channel. Context
+is always read live from Slack, so a missing history scope is the usual cause.
+
+**Checkpoint:** all six interactions answered. The bot is live both ways.
 
 ## B7 — Connect tools
 
