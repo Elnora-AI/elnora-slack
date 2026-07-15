@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.4](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.3...v0.1.4) (2026-07-15)
+
+
+### Features
+
+* **bot:** add linearRecentIssues tool for recency-sorted issue queries ([#27](https://github.com/Elnora-AI/elnora-slack/issues/27)) ([4769a20](https://github.com/Elnora-AI/elnora-slack/commit/4769a20ba56d5056b9e9db955ad1faa7e14002e8))
+* **bot:** emoji-reaction actions, per-user attribution, branding setup step ([#24](https://github.com/Elnora-AI/elnora-slack/issues/24)) ([cb4d22f](https://github.com/Elnora-AI/elnora-slack/commit/cb4d22fd456216ba0283c329faabe6a9a227bced))
+
+
+### Bug Fixes
+
+* **bot:** bump @ai-sdk/openai and @ai-sdk/google to v3 line ([#22](https://github.com/Elnora-AI/elnora-slack/issues/22)) ([8008bb9](https://github.com/Elnora-AI/elnora-slack/commit/8008bb99b40de5d5f4affbb4f3d234549c64ad2e))
+* **bot:** produce full-quality notes and stop duplicate writes ([#26](https://github.com/Elnora-AI/elnora-slack/issues/26)) ([fc64f2c](https://github.com/Elnora-AI/elnora-slack/commit/fc64f2cf5cec524d390191bed52733137057ab4e))
+* **bot:** rename reserved slash commands + make knowledge base the default install ([#25](https://github.com/Elnora-AI/elnora-slack/issues/25)) ([fb4f53a](https://github.com/Elnora-AI/elnora-slack/commit/fb4f53a3e0c294eeb17bbe259cfcc92507977088))
+
 ## [0.1.3](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.2...v0.1.3) (2026-07-14)
 
 
