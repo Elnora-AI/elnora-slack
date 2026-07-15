@@ -45,10 +45,17 @@ Or click-first:
   (`claude-sonnet-5` by default).
 - Conversation memory is read **live from Slack** on every message — the bot
   pulls the thread's replies (or the channel/DM's recent history) each time, so
-  it always has the full context with no external store required. It answers
-  follow-ups in any thread it's part of, including replies to messages it posted
-  proactively via `/api/send`. Redis (`REDIS_URL`, Upstash free tier) is
-  optional and only persists thread subscriptions across cold starts.
+  it always has the full context. It answers follow-ups in any thread it's part
+  of, including replies to messages it posted proactively via `/api/send`.
+- **Redis (`REDIS_URL`) is strongly recommended** for the fully-automated
+  experience: it persists the thread subscriptions that route channel follow-ups
+  across serverless cold starts. Provision it in one click from the Vercel
+  Marketplace (Upstash / Redis Cloud) or bring your own from
+  [Upstash](https://upstash.com) (free tier). Without it the bot still works but
+  relies on live participation detection alone for un-mentioned channel replies.
+- Slash commands (`/ask`, `/find`, …) echo your invocation back to the channel
+  before answering, so you always see what you asked and the reply — Slack
+  otherwise hides the command when the app responds.
 - Tool groups switch on purely by env presence — see
   [`src/lib/tools/index.ts`](src/lib/tools/index.ts) and
   [`.env.example`](.env.example).

@@ -23,10 +23,12 @@ import { resolveEmojiAction } from "./emoji-actions";
 import { scrubSlackBroadcasts } from "./slack-scrub";
 import {
 	classifyThreadMessages,
+	isOurBotMessage,
 	MAX_MSG_LENGTH,
 	type RawSlackMessage,
 	resolveChannelId,
 	type SlackContext,
+	selectContextWindow,
 } from "./thread-context";
 
 // ---------------------------------------------------------------------------
@@ -156,21 +158,26 @@ async function handleMessage(thread: BotThread, message: BotMessage, preloaded?:
 // in-memory dedup can't catch them — instead onSubscribedMessage skips any
 // message that mentions the bot, letting onNewMention own it. Non-mention
 // follow-ups in a subscribed thread still flow through onSubscribedMessage.
-let _botIdentity: { userId: string | null; botId: string | null } | null = null;
+
+// Cache ONLY a successful identity. Caching a failed auth.test (all-null) would
+// poison the warm serverless instance: with null ids, isOurBotMessage never
+// matches, botParticipated is always false, and the follow-up gate silently
+// stops answering. On failure we return nulls without caching, so the next
+// message retries.
+let _botIdentity: { userId: string; botId: string | null } | null = null;
 async function getBotIdentity(): Promise<{ userId: string | null; botId: string | null }> {
 	if (_botIdentity) return _botIdentity;
 	const token = process.env.SLACK_BOT_TOKEN;
-	if (!token) {
-		_botIdentity = { userId: null, botId: null };
-		return _botIdentity;
-	}
+	if (!token) return { userId: null, botId: null };
 	try {
 		const res = await new WebClient(token, { timeout: 5_000 }).auth.test();
-		_botIdentity = { userId: (res.user_id as string) ?? null, botId: (res.bot_id as string) ?? null };
+		const userId = (res.user_id as string) ?? null;
+		if (!userId) return { userId: null, botId: (res.bot_id as string) ?? null };
+		_botIdentity = { userId, botId: (res.bot_id as string) ?? null };
+		return _botIdentity;
 	} catch {
-		_botIdentity = { userId: null, botId: null };
+		return { userId: null, botId: null };
 	}
-	return _botIdentity;
 }
 
 async function getBotUserId(): Promise<string | null> {
@@ -186,11 +193,19 @@ async function mentionsBot(text: string | undefined): Promise<boolean> {
 // Live conversation context
 // ---------------------------------------------------------------------------
 
-/** How many prior messages to pull in for context (env-tunable, 1–50). */
+/** How many prior messages to hand the agent as context (env-tunable, 1–50). */
 const CONTEXT_LIMIT = (() => {
 	const n = Number.parseInt(process.env.BOT_CONTEXT_LIMIT ?? "", 10);
 	return Number.isFinite(n) && n >= 1 && n <= 50 ? n : 20;
 })();
+
+// How many thread replies to SCAN when resolving context. Slack returns thread
+// replies oldest-first, so to find the recent tail (and to detect the bot's own
+// participation anywhere in the thread) we pull a wide window in one call, then
+// trim to CONTEXT_LIMIT for the agent. 200 covers essentially every real thread
+// in a single request; the ~1% longer than that degrade to slightly-stale
+// context rather than breaking.
+const THREAD_SCAN_LIMIT = Math.max(CONTEXT_LIMIT, 200);
 
 /**
  * Read the recent conversation straight from Slack so the agent has real
@@ -212,14 +227,22 @@ async function fetchSlackContext(thread: BotThread, message: BotMessage): Promis
 	const client = new WebClient(token, { timeout: 8_000 });
 	const inThread = !!raw.thread_ts;
 
-	let msgs: RawSlackMessage[];
+	let scanned: RawSlackMessage[];
 	try {
 		if (raw.thread_ts) {
-			const res = await client.conversations.replies({ channel: channelId, ts: raw.thread_ts, limit: CONTEXT_LIMIT });
-			msgs = (res.messages ?? []) as RawSlackMessage[];
+			// Thread replies come back oldest-first: scan a wide window so we can
+			// take the recent tail and detect the bot's participation anywhere.
+			const res = await client.conversations.replies({
+				channel: channelId,
+				ts: raw.thread_ts,
+				limit: THREAD_SCAN_LIMIT,
+			});
+			scanned = (res.messages ?? []) as RawSlackMessage[];
 		} else {
+			// Channel/DM history comes back newest-first; take the newest window and
+			// flip to chronological order.
 			const res = await client.conversations.history({ channel: channelId, limit: CONTEXT_LIMIT });
-			msgs = ((res.messages ?? []) as RawSlackMessage[]).reverse();
+			scanned = ((res.messages ?? []) as RawSlackMessage[]).reverse();
 		}
 	} catch (err) {
 		// Surface Slack's error code (e.g. not_in_channel, missing_scope) so a
@@ -232,11 +255,11 @@ async function fetchSlackContext(thread: BotThread, message: BotMessage): Promis
 	}
 
 	const { userId, botId } = await getBotIdentity();
-	const { messages, botParticipated } = classifyThreadMessages(msgs, {
-		botUserId: userId,
-		botId,
-		currentTs: raw.ts,
-	});
+	// Participation is judged over the FULL scanned window (a bot reply may sit in
+	// the middle of a long thread), but the agent only sees the trimmed window.
+	const botParticipated = scanned.some((m) => m.ts !== raw.ts && isOurBotMessage(m, userId, botId));
+	const forContext = inThread ? selectContextWindow(scanned, CONTEXT_LIMIT) : scanned;
+	const { messages } = classifyThreadMessages(forContext, { botUserId: userId, botId, currentTs: raw.ts });
 	return { messages, botParticipated, channelId };
 }
 
@@ -384,6 +407,19 @@ async function runSlashCommand(event: SlashEvent, prompt: string): Promise<void>
 	if (!isAuthorized(event.user.userId)) {
 		await event.channel.post(UNAUTHORIZED_MSG);
 		return;
+	}
+	// Echo the invocation up front. Slack never posts the slash command itself to
+	// the channel when the app replies via chat.postMessage, so from the user's
+	// side their message just vanishes and a bot reply appears out of nowhere.
+	// Posting the command back (immediately, before the agent runs) restores the
+	// "I can see what I asked, then the answer" experience and doubles as a
+	// working indicator while the agent thinks.
+	const args = event.text?.trim();
+	const invocation = `${event.command}${args ? ` ${args}` : ""}`;
+	try {
+		await event.channel.post(`> <@${event.user.userId}> \`${invocation}\``);
+	} catch (err) {
+		console.error("Slash command echo failed:", err instanceof Error ? err.name : "unknown");
 	}
 	try {
 		const result = await agent.generate({ messages: [{ role: "user", content: prompt }] });

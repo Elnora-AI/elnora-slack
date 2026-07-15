@@ -492,8 +492,13 @@ These are the exact traps a real end-to-end setup hit — check them in order:
   compute or upgrade — long tool chains need the headroom.
 - **"Sorry, I'm not configured to assist you"** → `ALLOWED_SLACK_USER_IDS` is
   set and doesn't include that user. Unset it (or add them) + redeploy.
-- **Thread forgets context** → no `REDIS_URL`; in-memory state only survives
-  warm starts. Add Upstash (free tier).
+- **Bot doesn't answer un-mentioned thread follow-ups** → without `REDIS_URL`,
+  thread subscriptions don't survive cold starts, so a reply that doesn't
+  @-mention the bot may not route to it. The bot still answers follow-ups in
+  threads it has spoken in (live participation detection), but Redis makes it
+  reliable — add Upstash (free tier). Context itself is always read live from
+  Slack; if the bot says "I don't have prior context", check the logs for a
+  `slack.context: fetch failed` line (usually a missing history scope).
 - **Tool says "not configured"** → its env var isn't on *production*, or you
   forgot to redeploy after adding it. `vercel env ls` then `vercel --prod`.
 - **Slack shows "dispatch_failed"** on events → the deployment is erroring

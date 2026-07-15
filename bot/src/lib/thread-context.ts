@@ -13,6 +13,7 @@ export const MAX_MSG_LENGTH = 4000;
 export interface RawSlackMessage {
 	user?: string;
 	bot_id?: string;
+	username?: string;
 	text?: string;
 	ts?: string;
 }
@@ -58,12 +59,19 @@ export function resolveChannelId(thread: unknown, message: unknown): string | nu
 	return null;
 }
 
+/** True if a raw Slack message was posted by THIS bot (live agent reply or a
+ * proactive /api/send post, e.g. the Linear curator's prompts). Matches on the
+ * bot's user id OR bot id. Other apps' bot messages return false. */
+export function isOurBotMessage(msg: RawSlackMessage, botUserId: string | null, botId: string | null): boolean {
+	return (!!botUserId && msg.user === botUserId) || (!!botId && msg.bot_id === botId);
+}
+
 /**
  * Turn raw Slack messages into agent turns and report whether THIS bot
- * participated. The bot's own posts — matched by user id OR bot id, which
- * covers both live agent replies and proactive /api/send posts (e.g. the
- * Linear curator's prompts) — become `assistant` turns; everyone else's become
- * attributed `user` turns. The current message (by ts) is excluded.
+ * participated. Only THIS bot's posts become `assistant` turns; everyone else —
+ * humans AND other apps' bots (GitHub, PagerDuty, …) — become attributed `user`
+ * turns, so the agent never mistakes a third-party notification for something it
+ * said. The current message (by ts) is excluded.
  */
 export function classifyThreadMessages(
 	msgs: RawSlackMessage[],
@@ -74,16 +82,26 @@ export function classifyThreadMessages(
 	const messages = msgs
 		.filter((x) => x.text && x.ts !== opts.currentTs)
 		.map((x): ContextMessage => {
-			const isOurBot = (!!opts.botUserId && x.user === opts.botUserId) || (!!opts.botId && x.bot_id === opts.botId);
+			const isOurBot = isOurBotMessage(x, opts.botUserId, opts.botId);
 			if (isOurBot) botParticipated = true;
-			const isAssistant = isOurBot || !!x.bot_id;
 			const text = (x.text as string).slice(0, maxLen);
-			return {
-				role: isAssistant ? "assistant" : "user",
-				// Attribute human turns with the sender's Slack ID so the agent can
-				// tell speakers apart in multi-person channels.
-				content: isAssistant || !x.user ? text : `[from <@${x.user}>] ${text}`,
-			};
+			if (isOurBot) return { role: "assistant", content: text };
+			// Everyone else is attributed so the agent can tell speakers apart in
+			// multi-person threads and can't confuse another app's post with its own.
+			const who = x.user ? `<@${x.user}>` : (x.username ?? "an app");
+			return { role: "user", content: `[from ${who}] ${text}` };
 		});
 	return { messages, botParticipated };
+}
+
+/**
+ * Trim a fetched thread (oldest-first, index 0 = the thread parent) to the
+ * window the agent should see: the parent (often the bot's own question) plus
+ * the most-recent `limit-1` messages. Slack returns thread replies oldest-first,
+ * so without this a long thread would feed the agent its opening messages
+ * instead of the recent turns the current reply is actually responding to.
+ */
+export function selectContextWindow(msgs: RawSlackMessage[], limit: number): RawSlackMessage[] {
+	if (limit <= 0 || msgs.length <= limit) return msgs;
+	return [msgs[0], ...msgs.slice(-(limit - 1))];
 }

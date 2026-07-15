@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyThreadMessages, resolveChannelId } from "../thread-context";
+import { classifyThreadMessages, isOurBotMessage, resolveChannelId, selectContextWindow } from "../thread-context";
 
 describe("resolveChannelId", () => {
 	it("prefers the adapter's public channelId", () => {
@@ -41,18 +41,20 @@ describe("classifyThreadMessages", () => {
 		expect(messages).toEqual([{ role: "assistant", content: "What do you want to do with ELN-958?" }]);
 	});
 
-	it("attributes human turns and does NOT flag participation for other bots", () => {
+	it("attributes a third-party bot as a USER turn — never as our assistant", () => {
 		const { messages, botParticipated } = classifyThreadMessages(
 			[
 				{ user: "USOMEONE", text: "hello", ts: "1" },
-				{ bot_id: "BOTHER", text: "I am a different bot", ts: "2" },
+				{ bot_id: "BOTHER", username: "GitHub", text: "PR merged", ts: "2" },
+				{ bot_id: "BOTHER2", text: "no username here", ts: "3" },
 			],
 			bot,
 		);
 		expect(botParticipated).toBe(false);
 		expect(messages[0]).toEqual({ role: "user", content: "[from <@USOMEONE>] hello" });
-		// another bot's message is still context (assistant-ish) but not OUR participation
-		expect(messages[1].role).toBe("assistant");
+		// foreign bot messages must NOT be attributed to the agent itself
+		expect(messages[1]).toEqual({ role: "user", content: "[from GitHub] PR merged" });
+		expect(messages[2]).toEqual({ role: "user", content: "[from an app] no username here" });
 	});
 
 	it("detects participation by bot_id even if user id is absent", () => {
@@ -73,5 +75,35 @@ describe("classifyThreadMessages", () => {
 		);
 		expect(messages).toHaveLength(1);
 		expect(messages[0].content).toBe("[from <@U1>] abc");
+	});
+});
+
+describe("isOurBotMessage", () => {
+	it("matches on our bot user id or bot id, not on foreign bots", () => {
+		expect(isOurBotMessage({ user: "UBOT" }, "UBOT", "BBOT")).toBe(true);
+		expect(isOurBotMessage({ bot_id: "BBOT" }, "UBOT", "BBOT")).toBe(true);
+		expect(isOurBotMessage({ bot_id: "BOTHER" }, "UBOT", "BBOT")).toBe(false);
+		expect(isOurBotMessage({ user: "UHUMAN" }, "UBOT", "BBOT")).toBe(false);
+		// null identity (auth.test failed) must never match
+		expect(isOurBotMessage({ user: "UBOT", bot_id: "BBOT" }, null, null)).toBe(false);
+	});
+});
+
+describe("selectContextWindow", () => {
+	const mk = (n: number) => Array.from({ length: n }, (_, i) => ({ text: `m${i}`, ts: `${i}` }));
+
+	it("returns everything when at or under the limit", () => {
+		const msgs = mk(5);
+		expect(selectContextWindow(msgs, 10)).toBe(msgs);
+		expect(selectContextWindow(msgs, 5)).toBe(msgs);
+	});
+
+	it("keeps the parent (index 0) plus the most-recent limit-1 messages", () => {
+		const msgs = mk(50); // m0 (parent) .. m49 (newest)
+		const win = selectContextWindow(msgs, 20);
+		expect(win).toHaveLength(20);
+		expect(win[0].ts).toBe("0"); // parent preserved
+		expect(win[1].ts).toBe("31"); // then the last 19: m31..m49
+		expect(win[win.length - 1].ts).toBe("49"); // newest kept
 	});
 });
