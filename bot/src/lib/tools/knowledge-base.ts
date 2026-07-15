@@ -29,18 +29,60 @@ function sanitizeDriveQuery(raw: string): string {
 	return cleaned;
 }
 
+/**
+ * Convert a YYYY-MM-DD date into the RFC 3339 timestamp Drive expects in
+ * `modifiedTime`/`createdTime` comparisons. Returns null for anything that
+ * isn't a plain calendar date, so a malformed filter is dropped rather than
+ * injected into the query. Exported for tests.
+ */
+export function toDriveRfc3339(date: string | undefined, endOfDay = false): string | null {
+	if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+	return `${date}T${endOfDay ? "23:59:59" : "00:00:00"}`;
+}
+
+/**
+ * Build the `modifiedTime` clause(s) for a Drive query from optional after/
+ * before calendar dates. Pure and safe (only well-formed dates survive).
+ * Exported for tests.
+ */
+export function buildDateClauses(modifiedAfter?: string, modifiedBefore?: string): string {
+	const clauses: string[] = [];
+	const after = toDriveRfc3339(modifiedAfter, false);
+	if (after) clauses.push(`modifiedTime >= '${after}'`);
+	const before = toDriveRfc3339(modifiedBefore, true);
+	if (before) clauses.push(`modifiedTime <= '${before}'`);
+	return clauses.join(" and ");
+}
+
+/** Map a recency preference to a Drive `orderBy` value (undefined = relevance). */
+function driveOrderBy(sort: "relevance" | "newest" | "oldest" | undefined): string | undefined {
+	if (sort === "newest") return "modifiedTime desc";
+	if (sort === "oldest") return "modifiedTime";
+	return undefined; // relevance — Drive's default full-text ranking
+}
+
 export const kbSearch = tool({
-	description: `Search the ${KB_NAME} (on Google Drive) for internal documents: policies, contracts, templates, procedures, meeting notes.`,
+	description: `Search the ${KB_NAME} (on Google Drive) for internal documents: policies, contracts, templates, procedures, meeting notes. Keyword-ranked by default; set sort='newest' and/or the date filters to search by recency or a timeframe.`,
 	inputSchema: z.object({
 		query: z.string().max(500).describe("Search query — keywords like 'security policy', 'NDA template', 'pricing'"),
 		limit: z.number().optional().default(10).pipe(z.number().max(50)),
+		sort: z
+			.enum(["relevance", "newest", "oldest"])
+			.optional()
+			.default("relevance")
+			.describe("relevance = best keyword match (default); newest/oldest = order by last-modified time"),
+		modifiedAfter: z.string().optional().describe("Only files modified on/after this date (YYYY-MM-DD)"),
+		modifiedBefore: z.string().optional().describe("Only files modified on/before this date (YYYY-MM-DD)"),
 	}),
-	execute: async ({ query, limit }) => {
+	execute: async ({ query, limit, sort, modifiedAfter, modifiedBefore }) => {
 		const driveId = process.env.DRIVE_ID;
 		if (!driveId) return { error: "DRIVE_ID not configured — knowledge base search unavailable" };
 
 		const safeQuery = sanitizeDriveQuery(query);
 		if (!safeQuery) return { error: "Search query is empty after sanitization" };
+
+		const dateClauses = buildDateClauses(modifiedAfter, modifiedBefore);
+		const q = [`fullText contains '${safeQuery}'`, "trashed = false", dateClauses].filter(Boolean).join(" and ");
 
 		const drive = getDriveClient();
 		const MAX_RETRIES = 3;
@@ -49,11 +91,12 @@ export const kbSearch = tool({
 		for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
 			try {
 				const res = await drive.files.list({
-					q: `fullText contains '${safeQuery}' and trashed = false`,
+					q,
 					driveId,
 					corpora: "drive",
 					includeItemsFromAllDrives: true,
 					supportsAllDrives: true,
+					orderBy: driveOrderBy(sort),
 					fields: "files(id,name,mimeType,modifiedTime,webViewLink,parents)",
 					pageSize: limit,
 				});
@@ -80,6 +123,65 @@ export const kbSearch = tool({
 		const errMsg = lastErr instanceof Error ? lastErr.message : String(lastErr);
 		console.error("Knowledge base search exhausted retries:", { query: safeQuery, err: lastErr });
 		return { error: `Knowledge base search failed after ${MAX_RETRIES} retries: ${errMsg}` };
+	},
+});
+
+export const kbRecentNotes = tool({
+	description: `List the most recently modified files in the ${KB_NAME}, newest first. Use for "newest/latest note", "what changed recently", or "notes from this week/last month" questions — kbSearch ranks by keyword relevance, so it returns an arbitrary match for a recency question. Optionally narrow to files whose full text contains a keyword, or to a date range.`,
+	inputSchema: z.object({
+		limit: z.number().optional().default(10).pipe(z.number().max(50)),
+		query: z
+			.string()
+			.max(500)
+			.optional()
+			.describe("Optional keyword to narrow the recent list (full-text). Omit to list the most recent files overall."),
+		folderScope: z
+			.enum(["notes", "all"])
+			.optional()
+			.default("notes")
+			.describe("notes = only the notes folder (default when configured); all = the whole knowledge base"),
+		modifiedAfter: z.string().optional().describe("Only files modified on/after this date (YYYY-MM-DD)"),
+		modifiedBefore: z.string().optional().describe("Only files modified on/before this date (YYYY-MM-DD)"),
+	}),
+	execute: async ({ limit, query, folderScope, modifiedAfter, modifiedBefore }) => {
+		const driveId = process.env.DRIVE_ID;
+		if (!driveId) return { error: "DRIVE_ID not configured — knowledge base unavailable" };
+
+		const notesFolderId = process.env.NOTES_FOLDER_ID;
+		const clauses: string[] = ["trashed = false"];
+		// Default to the notes folder when it exists and the caller didn't ask for the whole drive.
+		if (folderScope !== "all" && notesFolderId) clauses.push(`'${notesFolderId}' in parents`);
+		if (query) {
+			const safeQuery = sanitizeDriveQuery(query);
+			if (safeQuery) clauses.push(`fullText contains '${safeQuery}'`);
+		}
+		const dateClauses = buildDateClauses(modifiedAfter, modifiedBefore);
+		if (dateClauses) clauses.push(dateClauses);
+
+		try {
+			const drive = getDriveClient();
+			const res = await drive.files.list({
+				q: clauses.join(" and "),
+				driveId,
+				corpora: "drive",
+				includeItemsFromAllDrives: true,
+				supportsAllDrives: true,
+				orderBy: "modifiedTime desc",
+				fields: "files(id,name,mimeType,modifiedTime,createdTime,webViewLink)",
+				pageSize: limit,
+			});
+			return (res.data.files ?? []).map((file) => ({
+				name: file.name,
+				type: file.mimeType,
+				modified: file.modifiedTime,
+				created: file.createdTime,
+				url: file.webViewLink,
+				id: file.id,
+			}));
+		} catch (err) {
+			console.error("Knowledge base recent-notes failed:", err instanceof Error ? err.message : String(err));
+			return { error: "Failed to list recent notes — check deployment logs" };
+		}
 	},
 });
 

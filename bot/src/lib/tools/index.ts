@@ -41,14 +41,19 @@ export function toolGroups(): ToolGroup[] {
 		!!(process.env.GOOGLE_DRIVE_REFRESH_TOKEN || process.env.GOOGLE_REFRESH_TOKEN) &&
 		!!process.env.DRIVE_ID;
 	const kbTools: ToolSet = process.env.NOTES_FOLDER_ID
-		? { kbSearch: kb.kbSearch, kbReadFile: kb.kbReadFile, kbCreateNote: kb.kbCreateNote }
-		: { kbSearch: kb.kbSearch, kbReadFile: kb.kbReadFile };
+		? {
+				kbSearch: kb.kbSearch,
+				kbRecentNotes: kb.kbRecentNotes,
+				kbReadFile: kb.kbReadFile,
+				kbCreateNote: kb.kbCreateNote,
+			}
+		: { kbSearch: kb.kbSearch, kbRecentNotes: kb.kbRecentNotes, kbReadFile: kb.kbReadFile };
 
 	return [
 		{
 			key: "knowledge-base",
 			label: "Knowledge base",
-			promptHint: `Search and read the ${KB_NAME()} (\`kbSearch\`, \`kbReadFile\`${process.env.NOTES_FOLDER_ID ? ", save notes with `kbCreateNote`" : ""}). This is the default place to look for internal docs, policies, templates, and procedures.`,
+			promptHint: `Search and read the ${KB_NAME()} (\`kbSearch\`, \`kbReadFile\`${process.env.NOTES_FOLDER_ID ? ", save notes with `kbCreateNote`" : ""}). This is the default place to look for internal docs, policies, templates, and procedures. For "latest/newest note" or date-scoped questions use \`kbRecentNotes\` (recency-ordered) — \`kbSearch\` ranks by keyword relevance, not recency, though it also accepts sort='newest' and date filters.`,
 			enabled: kbReadEnabled,
 			tools: kbTools,
 		},

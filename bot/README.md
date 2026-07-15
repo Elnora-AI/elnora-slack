@@ -43,8 +43,19 @@ Or click-first:
   thread replies) via the [chat SDK](https://www.npmjs.com/package/chat) and
   answers them with an [AI SDK](https://ai-sdk.dev) tool-loop agent
   (`claude-sonnet-5` by default).
-- Per-thread conversation memory lives in Redis (`REDIS_URL`, Upstash free
-  tier works) — or in-memory if unset.
+- Conversation memory is read **live from Slack** on every message — the bot
+  pulls the thread's replies (or the channel/DM's recent history) each time, so
+  it always has the full context. It answers follow-ups in any thread it's part
+  of, including replies to messages it posted proactively via `/api/send`.
+- **Redis (`REDIS_URL`) is strongly recommended** for the fully-automated
+  experience: it persists the thread subscriptions that route channel follow-ups
+  across serverless cold starts. Provision it in one click from the Vercel
+  Marketplace (Upstash / Redis Cloud) or bring your own from
+  [Upstash](https://upstash.com) (free tier). Without it the bot still works but
+  relies on live participation detection alone for un-mentioned channel replies.
+- Slash commands (`/ask`, `/find`, …) echo your invocation back to the channel
+  before answering, so you always see what you asked and the reply — Slack
+  otherwise hides the command when the app responds.
 - Tool groups switch on purely by env presence — see
   [`src/lib/tools/index.ts`](src/lib/tools/index.ts) and
   [`.env.example`](.env.example).
@@ -59,8 +70,11 @@ Or click-first:
 The bot ships to answer from **your** documents, not just its own knowledge — so
 connecting a knowledge base is the one tool you set up as part of the standard
 install, not an afterthought. It's a Google Drive shared drive (or folder): the
-bot gets `kbSearch` (full-text search over your docs), `kbReadFile` (read a
-document by ID), and `kbCreateNote` (save a markdown note back).
+bot gets `kbSearch` (full-text search, with `sort='newest'` and date filters),
+`kbRecentNotes` (newest notes first, for "latest note" / date-scoped questions),
+`kbReadFile` (read a document by ID), and `kbCreateNote` (save a markdown note
+back). Ask for "the newest note" or "notes from this week about X" and it uses
+the recency tools instead of an arbitrary keyword match.
 
 Four env vars turn it on:
 

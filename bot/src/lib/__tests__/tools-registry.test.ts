@@ -81,12 +81,14 @@ describe("tool registry gating", () => {
 
 		let tools = buildTools();
 		expect(tools).toHaveProperty("kbSearch");
+		expect(tools).toHaveProperty("kbRecentNotes");
 		expect(tools).toHaveProperty("kbReadFile");
 		expect(tools).not.toHaveProperty("kbCreateNote");
 
 		vi.stubEnv("NOTES_FOLDER_ID", "folder123");
 		tools = buildTools();
 		expect(tools).toHaveProperty("kbCreateNote");
+		expect(tools).toHaveProperty("kbRecentNotes");
 	});
 
 	it("GOOGLE_REFRESH_TOKEN with OAuth creds enables Gmail and Calendar", () => {
