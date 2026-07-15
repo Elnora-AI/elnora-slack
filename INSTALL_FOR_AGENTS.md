@@ -214,9 +214,12 @@ the chat.
 ## B1 — Prerequisites
 
 1. Node 20.9+ (`node --version`).
-2. A **Vercel account** — free Hobby tier works to start. If the user has
-   none, send them to [https://vercel.com/signup](https://vercel.com/signup)
-   *(offer to drive)*.
+2. A **Vercel account**. Hobby works, but the webhook route requests
+   `maxDuration=300`, above the Hobby default cap — so **enable Fluid Compute**
+   on the project (Project → Settings → Functions → Fluid Compute; free) or use
+   **Vercel Pro**, or long agent replies get truncated (the "first reply works
+   then silence" failure in B9). If the user has none, send them to
+   [https://vercel.com/signup](https://vercel.com/signup) *(offer to drive)*.
 3. The **Vercel CLI**:
 
    ```sh
@@ -226,9 +229,13 @@ the chat.
    ```
 
    `vercel login` opens a browser confirmation — wait for the user.
-4. An **Anthropic API key** from
-   [https://console.anthropic.com/](https://console.anthropic.com/) — the user
-   creates it and keeps it ready to paste in B3 (not into the chat).
+4. An **LLM API key**. Anthropic is the default — get one from
+   [https://console.anthropic.com/](https://console.anthropic.com/)
+   (`ANTHROPIC_API_KEY`). To use OpenAI or Google instead, set
+   `LLM_PROVIDER=openai` (`OPENAI_API_KEY`) or `LLM_PROVIDER=google`
+   (`GOOGLE_GENERATIVE_AI_API_KEY`) in B3; only the one key matching
+   `LLM_PROVIDER` is needed. The user keeps it ready to paste in B3 (not into
+   the chat).
 5. Optional but recommended: a browser automation tool (e.g. Chrome DevTools
    MCP) so you can drive the Slack/Vercel/Google dashboards and debug the
    deployment yourself.
@@ -308,7 +315,12 @@ automatically. The bot reads `REDIS_URL`; the others are harmless. Because each
 deployment namespaces its keys with `BOT_STATE_PREFIX` (default
 `slack-agent-bot`), **one store can be shared across bots** without collisions.
 Redeploy after connecting so the running build picks up the new env var, then
-confirm `GET /api/health` shows `redis: { ok: true }`.
+confirm `GET /api/health` shows the redis check `ok: true` **with a
+`latency_ms`** field — that means it actually connected. If instead you see
+`ok: true` with `detail: "not configured — using in-memory state"`, `REDIS_URL`
+never took: re-check the Storage connection and redeploy. (The health check
+reports `ok: true` in both states because the in-memory fallback still works, so
+the `latency_ms` / `detail` field is the real signal.)
 
 **Access control:** by default **everyone in the workspace** can use the bot —
 that's the point of an org bot, and the signing secret guarantees events only
@@ -325,9 +337,12 @@ manifest, plus Events API config).
 
 1. Before pasting, edit the manifest copy: set `display_information.name` and
    `features.bot_user.display_name` to what the org should see (e.g. "Acme
-   Agent"), and replace both `YOUR-DEPLOYMENT.vercel.app` placeholders with
-   the production domain from B2 (`vercel inspect` or the Vercel dashboard
-   shows it).
+   Agent"), and replace both `YOUR-DEPLOYMENT.vercel.app` placeholders with the
+   **stable production domain** — this is the project's production alias,
+   usually `https://<project-name>.vercel.app` (Vercel dashboard → Project →
+   Settings → Domains). **Do NOT use the hashed preview URL** that `vercel --yes`
+   printed in B2 (e.g. `…-abc123-team.vercel.app`) — that changes every deploy,
+   and pointing events at it is the #1 "bot never responds" failure (see B6).
 2. Open [https://api.slack.com/apps](https://api.slack.com/apps) *(offer to
    drive)* → **Create New App** → **From a manifest** → pick the workspace →
    paste the edited JSON.
@@ -369,7 +384,10 @@ curl -s https://<domain>/api/health
 ```
 
 Expect `"status":"ok"` with `slack_bot`, `slack_signing`, `anthropic` all
-`"ok": true`. In the Slack app config → **Event Subscriptions**, the request
+`"ok": true`. (The `anthropic` check only tests `ANTHROPIC_API_KEY`; if you set
+`LLM_PROVIDER=openai|google` it will read not-set — that's fine, treat a live
+reply in Slack from B6 as the real success signal.) In the Slack app config →
+**Event Subscriptions**, the request
 URL must show **Verified** (re-verify now if it didn't in B4).
 
 **Checkpoint:** health is `ok` AND the request URL is Verified. Both matter.
@@ -446,16 +464,22 @@ a Google OAuth client + refresh token:
 **Linear** — set `LINEAR_API_KEY` (Linear → Settings → Security & access →
 API keys). The bot discovers teams itself via `linearListTeams`.
 
-**Web search** — set `TAVILY_API_KEY` ([tavily.com](https://tavily.com), free
-tier).
+**Web search** — four independent providers, each lights up on its own key
+(set any subset): `TAVILY_API_KEY` ([tavily.com](https://tavily.com), free
+tier) · `EXA_API_KEY` ([exa.ai](https://exa.ai), neural search) ·
+`PERPLEXITY_API_KEY` (grounded answers with citations) · `VALYU_API_KEY`
+([valyu.network](https://valyu.network), citations-grade academic/financial/
+clinical research).
 
 **Slack history search** — set `SLACK_USER_TOKEN` (the `xoxp-` token from
-Part A Step 3).
+Part A Step 3, with `search:read`).
 
 **Email + Calendar (Gmail)** — reuses `GOOGLE_CLIENT_ID/SECRET` +
-`GOOGLE_REFRESH_TOKEN` with Gmail/Calendar scopes added when minting the
-token. Drafts are approval-gated by the system prompt; sends need explicit
-user approval in-thread.
+**`GOOGLE_REFRESH_TOKEN`** (with Gmail/Calendar scopes added when minting the
+token). Note: these gate on `GOOGLE_REFRESH_TOKEN` specifically — the
+Drive-only `GOOGLE_DRIVE_REFRESH_TOKEN` powers the KB but does **not** enable
+Gmail/Calendar. Drafts are approval-gated by the system prompt; sends need
+explicit user approval in-thread.
 
 **Outbound send API (optional, for the user's own automations)** — set
 `SEND_API_SECRET` (e.g. `openssl rand -hex 32`); then
