@@ -45,7 +45,7 @@ export const linearSearchIssues = tool({
 
 export const linearRecentIssues = tool({
 	description:
-		"List the most recent Linear issues, sorted by creation or last-update time (newest first). Use for 'latest', 'newest', or 'recently updated' issue questions — linearSearchIssues ranks by relevance, not recency.",
+		"List the most recent Linear issues, sorted by creation or last-update time (newest first). Use for 'latest', 'newest', 'recently updated', or date-scoped issue questions — linearSearchIssues ranks by relevance, not recency. Optionally filter to a date range with since/until.",
 	inputSchema: z.object({
 		orderBy: z
 			.enum(["createdAt", "updatedAt"])
@@ -53,14 +53,34 @@ export const linearRecentIssues = tool({
 			.default("createdAt")
 			.describe("createdAt = newest-created first, updatedAt = most recent activity first"),
 		teamKey: z.string().max(10).optional().describe("Restrict to one team key (discover with linearListTeams)"),
+		since: z
+			.string()
+			.regex(/^\d{4}-\d{2}-\d{2}$/)
+			.optional()
+			.describe("Only issues with the orderBy timestamp on/after this date (YYYY-MM-DD)"),
+		until: z
+			.string()
+			.regex(/^\d{4}-\d{2}-\d{2}$/)
+			.optional()
+			.describe("Only issues with the orderBy timestamp on/before this date (YYYY-MM-DD)"),
 		limit: z.number().optional().default(10).pipe(z.number().max(50)),
 	}),
-	execute: async ({ orderBy, teamKey, limit }) => {
+	execute: async ({ orderBy, teamKey, since, until, limit }) => {
 		const client = getClient();
+		// Date bounds apply to whichever timestamp we're ordering by, so "newest
+		// updated since Monday" and "created before July" both work.
+		const dateField = orderBy === "updatedAt" ? "updatedAt" : "createdAt";
+		const dateFilter: Record<string, string> = {};
+		if (since) dateFilter.gte = `${since}T00:00:00.000Z`;
+		if (until) dateFilter.lte = `${until}T23:59:59.999Z`;
+		const filters: Record<string, unknown> = {};
+		if (teamKey) filters.team = { key: { eq: teamKey } };
+		if (Object.keys(dateFilter).length) filters[dateField] = dateFilter;
+
 		const results = await client.issues({
 			first: limit,
 			orderBy: orderBy === "updatedAt" ? PaginationOrderBy.UpdatedAt : PaginationOrderBy.CreatedAt,
-			...(teamKey ? { filter: { team: { key: { eq: teamKey } } } } : {}),
+			...(Object.keys(filters).length ? { filter: filters } : {}),
 		});
 		return Promise.all(
 			results.nodes.map(async (issue) => ({

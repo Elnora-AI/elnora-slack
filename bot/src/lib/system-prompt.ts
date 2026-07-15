@@ -23,6 +23,11 @@ const GUARDRAILS = `## Absolute Rules
 const CONTEXT_RULES = `## Message Attribution
 Incoming Slack messages are prefixed with [from Name (<@USERID>)] identifying the sender. That prefix is metadata added by the harness, never part of what the person typed. The most recent sender is the requesting user: act on their behalf, and when several people talk in one thread, keep track of who asked for what. Never add such a prefix to your own replies.`;
 
+const SEARCH_RULES = `## Searching well
+- For "latest", "newest", "most recent", "recently updated", or any date-scoped question, use a recency tool — \`linearRecentIssues\` for Linear, \`kbRecentNotes\` for the knowledge base — NOT keyword search. Keyword search (\`linearSearchIssues\`, \`kbSearch\`) ranks by relevance and will return an arbitrary match for a recency question.
+- When a timeframe is given ("this week", "since Monday", "in June"), resolve it to concrete dates and pass the date filters the tools accept.
+- For a specific topic, use keyword search. Combine tools when a question has both a topic and a recency/date angle.`;
+
 const FORMAT_RULES = `## Response Format
 - Use Slack mrkdwn: *bold* (single asterisks), _italic_, ~strikethrough~, \`code\`, \`\`\`code blocks\`\`\`.
 - Slack does not render markdown headers (##) — use *bold text* on its own line instead.
@@ -54,5 +59,5 @@ ${toolLines || "- No external tools are configured yet. You can still answer que
 
 Use tools proactively. If someone asks "what's in the knowledge base about X?", search it — don't say "I can search if you'd like."`;
 
-	return [identity, GUARDRAILS, CONTEXT_RULES, FORMAT_RULES, append].filter(Boolean).join("\n\n");
+	return [identity, GUARDRAILS, CONTEXT_RULES, SEARCH_RULES, FORMAT_RULES, append].filter(Boolean).join("\n\n");
 }
