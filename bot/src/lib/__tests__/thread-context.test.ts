@@ -1,17 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { classifyThreadMessages, isOurBotMessage, resolveChannelId, selectContextWindow } from "../thread-context";
+import {
+	bareChannelId,
+	classifyThreadMessages,
+	isOurBotMessage,
+	resolveChannelId,
+	selectContextWindow,
+} from "../thread-context";
+
+describe("bareChannelId", () => {
+	it("strips the slack: adapter prefix and any :ts suffix", () => {
+		expect(bareChannelId("slack:C0123")).toBe("C0123");
+		expect(bareChannelId("slack:D0BGUNVQXQX")).toBe("D0BGUNVQXQX");
+		expect(bareChannelId("slack:C0123:1699999999.0001")).toBe("C0123");
+	});
+	it("leaves an already-bare id untouched", () => {
+		expect(bareChannelId("C0123")).toBe("C0123");
+	});
+});
 
 describe("resolveChannelId", () => {
-	it("prefers the adapter's public channelId", () => {
-		expect(resolveChannelId({ channelId: "C123", id: "slack:CXXX:1.2" }, {})).toBe("C123");
+	it("prefers the raw Slack event channel, already bare", () => {
+		// raw.channel wins over the SDK's prefixed channelId
+		expect(resolveChannelId({ channelId: "slack:CXXX" }, { raw: { channel: "D999" } })).toBe("D999");
 	});
 
-	it("falls back to the raw Slack event's channel", () => {
-		expect(resolveChannelId({}, { raw: { channel: "D999" } })).toBe("D999");
+	it("strips the slack: prefix off the SDK's channelId (the prod regression)", () => {
+		expect(resolveChannelId({ channelId: "slack:D0BGUNVQXQX", id: "slack:D0BGUNVQXQX" }, {})).toBe("D0BGUNVQXQX");
 	});
 
-	it("falls back to a channel object's id", () => {
-		expect(resolveChannelId({ channel: { id: "C777" } }, {})).toBe("C777");
+	it("strips the prefix off a channel object's id", () => {
+		expect(resolveChannelId({ channel: { id: "slack:C777" } }, {})).toBe("C777");
 	});
 
 	it("parses the slack:<channel>:<ts> thread key", () => {
