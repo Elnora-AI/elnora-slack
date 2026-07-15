@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.5](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.4...v0.1.5) (2026-07-15)
+
+
+### Features
+
+* **bot:** reliable thread memory + recency/date search ([#30](https://github.com/Elnora-AI/elnora-slack/issues/30)) ([780bb0e](https://github.com/Elnora-AI/elnora-slack/commit/780bb0e937bd3a31ffec93020bcfb850e37d9b15))
+
+
+### Bug Fixes
+
+* **bot:** strip slack: prefix from resolved channel id ([#31](https://github.com/Elnora-AI/elnora-slack/issues/31)) ([c869afb](https://github.com/Elnora-AI/elnora-slack/commit/c869afb678010e6de28a82d4930a725d32409ba5))
+
 ## [0.1.4](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.3...v0.1.4) (2026-07-15)
 
 
