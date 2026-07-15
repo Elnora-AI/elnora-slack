@@ -10,7 +10,7 @@ import {
 describe("bareChannelId", () => {
 	it("strips the slack: adapter prefix and any :ts suffix", () => {
 		expect(bareChannelId("slack:C0123")).toBe("C0123");
-		expect(bareChannelId("slack:D0BGUNVQXQX")).toBe("D0BGUNVQXQX");
+		expect(bareChannelId("slack:D0XXXXXXXXX")).toBe("D0XXXXXXXXX");
 		expect(bareChannelId("slack:C0123:1699999999.0001")).toBe("C0123");
 	});
 	it("leaves an already-bare id untouched", () => {
@@ -25,7 +25,7 @@ describe("resolveChannelId", () => {
 	});
 
 	it("strips the slack: prefix off the SDK's channelId (the prod regression)", () => {
-		expect(resolveChannelId({ channelId: "slack:D0BGUNVQXQX", id: "slack:D0BGUNVQXQX" }, {})).toBe("D0BGUNVQXQX");
+		expect(resolveChannelId({ channelId: "slack:D0XXXXXXXXX", id: "slack:D0XXXXXXXXX" }, {})).toBe("D0XXXXXXXXX");
 	});
 
 	it("strips the prefix off a channel object's id", () => {
