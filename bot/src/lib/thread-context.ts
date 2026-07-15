@@ -33,22 +33,37 @@ export interface SlackContext {
 }
 
 /**
- * Resolve the Slack channel id for a thread/message. Defensive by design:
- * tries the adapter's public `channelId`, then the raw event's `channel`,
- * then a `channel` object, then the `slack:C…:ts` thread key. A silent failure
- * here is what makes the bot "forget" a thread, so every known shape is covered.
+ * Strip the chat-SDK's `slack:` adapter prefix (and any `:ts` suffix) to get the
+ * bare Slack channel id the Web API expects. The SDK's `thread.channelId` and
+ * thread keys look like `slack:C0123` or `slack:C0123:1699…`; Slack's
+ * conversations.* endpoints need `C0123`, and passing the prefixed form fails
+ * with `channel_not_found`.
+ */
+export function bareChannelId(raw: string): string {
+	const m = raw.match(/^slack:([^:]+)/);
+	return m ? m[1] : raw;
+}
+
+/**
+ * Resolve the bare Slack channel id for a thread/message. Defensive by design:
+ * prefers the raw Slack event's `channel` (already bare and authoritative),
+ * then the SDK's `channelId`, a `channel` object, or the `slack:C…:ts` thread
+ * key — normalizing the adapter prefix off each. A silent failure here is what
+ * makes the bot "forget" a thread, so every known shape is covered.
  */
 export function resolveChannelId(thread: unknown, message: unknown): string | null {
 	const t = (thread ?? {}) as Record<string, unknown>;
 	const m = (message ?? {}) as Record<string, unknown>;
 
-	if (typeof t.channelId === "string" && t.channelId) return t.channelId;
-
+	// The Slack event's channel field is the authoritative bare id (C…/D…/G…).
 	const rawChannel = (m.raw as { channel?: string } | undefined)?.channel;
-	if (typeof rawChannel === "string" && rawChannel) return rawChannel;
+	if (typeof rawChannel === "string" && rawChannel) return bareChannelId(rawChannel);
+
+	// The SDK's channelId carries the `slack:` prefix — strip it.
+	if (typeof t.channelId === "string" && t.channelId) return bareChannelId(t.channelId);
 
 	const channelObj = t.channel as { id?: string } | undefined;
-	if (channelObj && typeof channelObj.id === "string" && channelObj.id) return channelObj.id;
+	if (channelObj && typeof channelObj.id === "string" && channelObj.id) return bareChannelId(channelObj.id);
 
 	for (const v of [t.threadId, t.id]) {
 		if (typeof v === "string") {
