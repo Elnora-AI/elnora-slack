@@ -213,7 +213,7 @@ the chat.
 
 ## B1 — Prerequisites
 
-1. Node 20.9+ (`node --version`).
+1. Node 22+ (`node --version`).
 2. A **Vercel account**. Hobby works, but the webhook route requests
    `maxDuration=300`, above the Hobby default cap — so **enable Fluid Compute**
    on the project (Project → Settings → Functions → Fluid Compute; free) or use
