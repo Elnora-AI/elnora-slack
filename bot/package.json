@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.95",
-    "@chat-adapter/slack": "4.32.0",
+    "@chat-adapter/slack": "4.34.0",
     "@chat-adapter/state-memory": "4.32.0",
-    "@chat-adapter/state-redis": "4.32.0",
+    "@chat-adapter/state-redis": "4.34.0",
     "@linear/sdk": "^88.0.0",
     "@slack/web-api": "^7.19.0",
     "ai": "^6.0.221",
