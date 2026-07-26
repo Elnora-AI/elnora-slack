@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.5...v0.2.0) (2026-07-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** bump ai to 7, p-retry to 8, setup-node to v7; raise bot Node floor to 22 ([#45](https://github.com/Elnora-AI/elnora-slack/issues/45))
+
+### Miscellaneous Chores
+
+* **deps:** bump ai to 7, p-retry to 8, setup-node to v7; raise bot Node floor to 22 ([#45](https://github.com/Elnora-AI/elnora-slack/issues/45)) ([80a8032](https://github.com/Elnora-AI/elnora-slack/commit/80a803215e2e32e7affce0855e4f004b81f3f1e9))
+
 ## [0.1.5](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.4...v0.1.5) (2026-07-15)
 
 
