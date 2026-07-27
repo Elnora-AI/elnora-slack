@@ -139,7 +139,7 @@ Full details in [SAFETY.md](SAFETY.md).
 Everything above is one-way: your terminal agent acting on Slack. The [`bot/`](bot/) directory ships the other direction — a deployable Next.js app (Vercel) that answers **incoming** Slack messages with an AI agent:
 
 - **Org-wide by default** — anyone in the workspace can DM it or @-mention it in a channel; it replies in threads and remembers the conversation (Redis).
-- **Pluggable tools, zero hardcoding** — knowledge base on Google Drive (default), Linear, Gmail, Calendar, web search, Slack history search; each switches on by env var. Adding ClickUp/Monday/anything is a ~50-line recipe.
+- **Pluggable tools, zero hardcoding** — knowledge base on Google Drive (default, **read and write**: it searches, reads, edits existing files, and creates new ones), Linear, Gmail, Calendar, web search, Slack history search; each switches on by env var. Adding ClickUp/Monday/anything is a ~50-line recipe.
 - **Safe by default** — broadcast-ping scrubbing, approval-gated sends, prompt-injection guardrails.
 - **Guided setup** — [Part B of INSTALL_FOR_AGENTS.md](INSTALL_FOR_AGENTS.md#part-b--the-two-way-bot-optional) walks an AI agent through Vercel CLI, the Slack app manifest, env wiring, and live smoke tests.
 

@@ -17,6 +17,14 @@ import { getDriveClient } from "@/lib/google-auth";
 
 const KB_NAME = process.env.KB_NAME?.trim() || "knowledge base";
 
+/**
+ * Whether the bot may change the knowledge base (kbEditFile / kbCreateFile).
+ * On unless a deployment explicitly opts out with KB_WRITE_ENABLED=false.
+ */
+export function kbWriteEnabled(): boolean {
+	return !/^(0|false|no|off)$/i.test(process.env.KB_WRITE_ENABLED?.trim() ?? "");
+}
+
 /** Strip characters that could alter Drive query semantics */
 function sanitizeDriveQuery(raw: string): string {
 	// Strip non-alphanumeric chars (except spaces, dots, hyphens)
@@ -352,6 +360,13 @@ Before calling: run kbSearch to find related notes and populate \`related\`. Onl
  */
 const WRITABLE_FILENAME = /^[\w][\w .()-]{0,150}\.(md|markdown|txt|csv|json|yaml|yml)$/;
 
+/**
+ * Drive IDs are opaque tokens of [A-Za-z0-9_-]. They must be validated, never
+ * "sanitized" — stripping characters out of an ID silently turns it into a
+ * different, non-existent one — and they get interpolated into Drive queries.
+ */
+const DRIVE_ID = /^[A-Za-z0-9_-]{10,200}$/;
+
 /** Google-native docs (Docs/Sheets/Slides) can't be rewritten as plain text. */
 function isGoogleNative(mimeType: string | null | undefined): boolean {
 	return !!mimeType?.startsWith("application/vnd.google-apps");
@@ -369,15 +384,23 @@ export const kbListFolders = tool({
 			.string()
 			.max(200)
 			.optional()
-			.describe("List only folders directly inside this folder. Omit to search the whole knowledge base."),
+			.describe(
+				"List only folders directly inside this folder — must be a Drive folder ID from a previous result, not a folder name or path. Omit to search the whole knowledge base by name.",
+			),
 		limit: z.number().optional().default(25).pipe(z.number().max(100)),
 	}),
 	execute: async ({ query, parentFolderId, limit }) => {
 		const driveId = process.env.DRIVE_ID;
 		if (!driveId) return { error: "DRIVE_ID not configured — knowledge base unavailable" };
 
+		if (parentFolderId && !DRIVE_ID.test(parentFolderId)) {
+			return {
+				error: `"${parentFolderId}" is not a Drive folder ID. To find a folder by name, pass it as \`query\` instead and leave parentFolderId empty.`,
+			};
+		}
+
 		const clauses = ["mimeType = 'application/vnd.google-apps.folder'", "trashed = false"];
-		if (parentFolderId) clauses.push(`'${sanitizeDriveQuery(parentFolderId)}' in parents`);
+		if (parentFolderId) clauses.push(`'${parentFolderId}' in parents`);
 		if (query) {
 			const safeQuery = sanitizeDriveQuery(query);
 			if (safeQuery) clauses.push(`name contains '${safeQuery}'`);
@@ -401,8 +424,9 @@ export const kbListFolders = tool({
 				url: folder.webViewLink,
 			}));
 		} catch (err) {
-			console.error("Knowledge base list-folders failed:", err instanceof Error ? err.message : String(err));
-			return { error: "Failed to list folders — check deployment logs" };
+			const detail = err instanceof Error ? err.message : String(err);
+			console.error("Knowledge base list-folders failed:", detail);
+			return { error: `Failed to list folders: ${detail}` };
 		}
 	},
 });
@@ -498,12 +522,17 @@ Find the destination with kbListFolders and pass its \`folderId\`; without one t
 			.string()
 			.max(200)
 			.optional()
-			.describe("Destination folder ID from kbListFolders. Omit to use the default notes folder."),
+			.describe(
+				"Destination folder ID from kbListFolders — an ID, not a folder name or path. Omit to use the default notes folder.",
+			),
 	}),
 	execute: async ({ fileName, content, folderId }) => {
 		const targetFolder = folderId || process.env.NOTES_FOLDER_ID;
 		if (!targetFolder) {
 			return { error: "No folderId given and NOTES_FOLDER_ID is not configured — use kbListFolders to pick a folder" };
+		}
+		if (!DRIVE_ID.test(targetFolder)) {
+			return { error: `"${targetFolder}" is not a Drive folder ID — get one from kbListFolders and pass that.` };
 		}
 
 		const extension = fileName.split(".").pop()?.toLowerCase();

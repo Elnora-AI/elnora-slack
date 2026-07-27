@@ -10,7 +10,7 @@ vi.mock("@/lib/google-auth", () => ({
 }));
 
 // Imported after the mock is registered.
-const { kbEditFile, kbCreateFile } = await import("../tools/knowledge-base");
+const { kbEditFile, kbCreateFile, kbListFolders } = await import("../tools/knowledge-base");
 
 type Exec<I> = { execute: (i: I) => Promise<Record<string, unknown>> };
 
@@ -43,7 +43,7 @@ async function writtenContent(): Promise<string> {
 }
 
 beforeEach(() => {
-	vi.stubEnv("NOTES_FOLDER_ID", "folder123");
+	vi.stubEnv("NOTES_FOLDER_ID", "1NoTeSfolder_abcdefghijklmnop");
 	vi.stubEnv("DRIVE_ID", "drive123");
 	get.mockReset();
 	update.mockReset();
@@ -126,10 +126,14 @@ describe("kbCreateFile", () => {
 		list.mockResolvedValue({ data: { files: [] } });
 		create.mockResolvedValue({ data: { id: "new1", name: "report.md", webViewLink: "https://drive/new1" } });
 
-		const res = await createFile({ fileName: "report.md", content: "# Report\n", folderId: "tasks99" });
+		const res = await createFile({
+			fileName: "report.md",
+			content: "# Report\n",
+			folderId: "1TaSkSfolder_abcdefghijklmnop",
+		});
 
 		expect(res.success).toBe(true);
-		expect(create.mock.calls[0][0].requestBody.parents).toEqual(["tasks99"]);
+		expect(create.mock.calls[0][0].requestBody.parents).toEqual(["1TaSkSfolder_abcdefghijklmnop"]);
 		expect(create.mock.calls[0][0].requestBody.mimeType).toBe("text/markdown");
 	});
 
@@ -139,7 +143,15 @@ describe("kbCreateFile", () => {
 
 		await createFile({ fileName: "report.md", content: "# Report\n" });
 
-		expect(create.mock.calls[0][0].requestBody.parents).toEqual(["folder123"]);
+		expect(create.mock.calls[0][0].requestBody.parents).toEqual(["1NoTeSfolder_abcdefghijklmnop"]);
+	});
+
+	it("rejects a folder name where a folder ID is required", async () => {
+		const res = await createFile({ fileName: "report.md", content: "x", folderId: "16-tasks" });
+
+		expect(res.error).toMatch(/not a Drive folder ID/);
+		expect(list).not.toHaveBeenCalled();
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it("returns the existing file rather than duplicating it", async () => {
@@ -147,9 +159,43 @@ describe("kbCreateFile", () => {
 			data: { files: [{ id: "old1", name: "report.md", webViewLink: "https://drive/old1" }] },
 		});
 
-		const res = await createFile({ fileName: "report.md", content: "# Report\n", folderId: "tasks99" });
+		const res = await createFile({
+			fileName: "report.md",
+			content: "# Report\n",
+			folderId: "1TaSkSfolder_abcdefghijklmnop",
+		});
 
 		expect(res.alreadyExists).toBe(true);
 		expect(create).not.toHaveBeenCalled();
+	});
+});
+
+interface ListInput {
+	query?: string;
+	parentFolderId?: string;
+	limit: number;
+}
+
+async function listFolders(input: Partial<ListInput>) {
+	return (kbListFolders as unknown as Exec<ListInput>).execute({ limit: 25, ...input });
+}
+
+describe("kbListFolders", () => {
+	it("passes a real folder ID through untouched — IDs must never be sanitized", async () => {
+		list.mockResolvedValue({ data: { files: [] } });
+		// Underscores are legal in Drive IDs; stripping them yields a valid-looking
+		// ID for a folder that doesn't exist ("File not found").
+		const id = "1a_Bc-DEF_ghi23456789";
+
+		await listFolders({ parentFolderId: id });
+
+		expect(list.mock.calls[0][0].q).toContain(`'${id}' in parents`);
+	});
+
+	it("tells the agent to use query when handed a folder name", async () => {
+		const res = await listFolders({ parentFolderId: "16-tasks" });
+
+		expect(res.error).toMatch(/not a Drive folder ID/);
+		expect(list).not.toHaveBeenCalled();
 	});
 });
