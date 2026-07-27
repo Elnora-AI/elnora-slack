@@ -1,6 +1,6 @@
 {
   "name": "slack-workspace",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The entire Slack Web API for Claude Code — 201 methods, approval-gated sending, a cached workspace reference, and scheduled-job alerting. Backed by the elnora-slack CLI.",
   "author": {
     "name": "Elnora AI",

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.2.0...v0.3.0) (2026-07-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **bot:** knowledge base is read and write for every deployment ([#50](https://github.com/Elnora-AI/elnora-slack/issues/50))
+
+### Features
+
+* **bot:** knowledge base is read and write for every deployment ([#50](https://github.com/Elnora-AI/elnora-slack/issues/50)) ([a049649](https://github.com/Elnora-AI/elnora-slack/commit/a0496491eece0a71625194860257adc1fc8f54fd))
+* **bot:** let the agent edit knowledge-base files and create files anywhere ([#49](https://github.com/Elnora-AI/elnora-slack/issues/49)) ([4c98ca7](https://github.com/Elnora-AI/elnora-slack/commit/4c98ca72440fe16fe2870c5da23af34bab02e433))
+
+
+### Bug Fixes
+
+* **deps:** resolve both open Dependabot alerts (sharp libvips CVEs, brace-expansion DoS) ([#47](https://github.com/Elnora-AI/elnora-slack/issues/47)) ([11ac58d](https://github.com/Elnora-AI/elnora-slack/commit/11ac58d2b62a47b6a6a581c0d1377fec82f83cdd))
+
 ## [0.2.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.1.5...v0.2.0) (2026-07-26)
 
 
