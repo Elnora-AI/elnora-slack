@@ -14,6 +14,7 @@ const GATING_ENVS = [
 	"GOOGLE_DRIVE_REFRESH_TOKEN",
 	"DRIVE_ID",
 	"NOTES_FOLDER_ID",
+	"KB_WRITE_ENABLED",
 ];
 
 beforeEach(() => {
@@ -89,6 +90,23 @@ describe("tool registry gating", () => {
 		tools = buildTools();
 		expect(tools).toHaveProperty("kbCreateNote");
 		expect(tools).toHaveProperty("kbRecentNotes");
+	});
+
+	it("kbEditFile and kbCreateFile only register when KB_WRITE_ENABLED is on", () => {
+		vi.stubEnv("GOOGLE_CLIENT_ID", "cid");
+		vi.stubEnv("GOOGLE_CLIENT_SECRET", "csec");
+		vi.stubEnv("GOOGLE_DRIVE_REFRESH_TOKEN", "rtok");
+		vi.stubEnv("DRIVE_ID", "0ABCdrive");
+
+		let tools = buildTools();
+		expect(tools).toHaveProperty("kbListFolders");
+		expect(tools).not.toHaveProperty("kbEditFile");
+		expect(tools).not.toHaveProperty("kbCreateFile");
+
+		vi.stubEnv("KB_WRITE_ENABLED", "true");
+		tools = buildTools();
+		expect(tools).toHaveProperty("kbEditFile");
+		expect(tools).toHaveProperty("kbCreateFile");
 	});
 
 	it("GOOGLE_REFRESH_TOKEN with OAuth creds enables Gmail and Calendar", () => {
