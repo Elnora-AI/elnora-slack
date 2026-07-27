@@ -35,7 +35,7 @@ Everything the bot needs, in one place. Full env reference: [`.env.example`](.en
 |---|---|
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud OAuth client (Desktop app). |
 | `GOOGLE_REFRESH_TOKEN` | Drive grant. **This same token also enables Gmail + Calendar** once their scopes are on it. (`GOOGLE_DRIVE_REFRESH_TOKEN` is a Drive-*only* alternative that powers the KB but **not** Gmail/Calendar.) |
-| `DRIVE_ID` (+ optional `NOTES_FOLDER_ID`) | Which drive holds the docs; the folder for saved notes. Enable the **Google Drive API** on the project. |
+| `DRIVE_ID` (+ optional `NOTES_FOLDER_ID`) | Which drive holds the docs; the folder for saved notes. Enable the **Google Drive API** on the project. The bot reads *and* writes this drive, so the account behind the token needs edit rights (`KB_WRITE_ENABLED=false` for a read-only bot). |
 
 **Optional tools** — each lights up on its own env var (source of truth: [`src/lib/tools/index.ts`](src/lib/tools/index.ts)):
 
@@ -110,22 +110,38 @@ Or click-first:
 
 The bot ships to answer from **your** documents, not just its own knowledge — so
 connecting a knowledge base is the one tool you set up as part of the standard
-install, not an afterthought. It's a Google Drive shared drive (or folder): the
-bot gets `kbSearch` (full-text search, with `sort='newest'` and date filters),
-`kbRecentNotes` (newest notes first, for "latest note" / date-scoped questions),
-`kbReadFile` (read a document by ID), `kbListFolders` (browse the folder tree),
-and `kbCreateNote` (save a markdown note back). Ask for "the newest note" or
-"notes from this week about X" and it uses the recency tools instead of an
-arbitrary keyword match.
+install, not an afterthought. It's a Google Drive shared drive (or folder), and
+the connection is **read *and* write**: the bot can maintain the knowledge base,
+not only quote it.
 
-Set `KB_WRITE_ENABLED=true` and it can also *change* the knowledge base:
-`kbEditFile` edits an existing text file in place (read it, then replace an exact
-stretch of text — this is how "tick those three off the task list" or "fix that
-line in the runbook" works) and `kbCreateFile` writes a new file into any folder,
-not just the notes folder. Plain-text files only (`.md`, `.txt`, `.csv`, `.json`,
-`.yaml`) — Google Docs and Sheets are rejected, since they aren't text. The token
-needs the full `drive` scope and edit rights on the drive; Drive version history
-is the undo. Leave the flag unset for a read-only bot.
+**Read**
+
+| Tool | What it does |
+|---|---|
+| `kbSearch` | Full-text search, with `sort='newest'` and date filters |
+| `kbRecentNotes` | Newest notes first — for "latest note" / date-scoped questions |
+| `kbReadFile` | Read a document by ID, paging through long files with `offset` |
+| `kbListFolders` | Browse the folder tree / find where to put something |
+
+**Write**
+
+| Tool | What it does |
+|---|---|
+| `kbCreateNote` | Save a structured markdown note into the notes folder (`NOTES_FOLDER_ID`) |
+| `kbEditFile` | Edit an existing text file **in place** — read it, then replace an exact stretch of text. This is what makes "tick those three off the task list" or "fix that line in the runbook" work |
+| `kbCreateFile` | Write a new file into **any** folder, not just the notes folder |
+
+Ask for "the newest note" or "notes from this week about X" and it uses the
+recency tools instead of an arbitrary keyword match. Ask it to change something
+and it changes it, then tells you what it changed.
+
+Writing is plain-text files only (`.md`, `.txt`, `.csv`, `.json`, `.yaml`) —
+Google Docs and Sheets are rejected, since they aren't text. The refresh token
+needs the full `drive` scope **and** the account behind it needs edit rights on
+the drive (a viewer-only account will search and read fine, then fail on the
+first edit). Every edit is a normal Drive revision, so version history is the
+undo. Set `KB_WRITE_ENABLED=false` if you want a read-only bot instead; `/botstatus`
+reports which mode a deployment is in.
 
 Four env vars turn it on:
 

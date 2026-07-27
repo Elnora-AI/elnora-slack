@@ -280,10 +280,12 @@ Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
 
 **Plan to connect the knowledge base in this same pass.** It's the bot's default
 connection — the whole point is that it answers from the user's own documents,
-not just the model's training. You'll wire the `GOOGLE_*` + `DRIVE_ID` vars in
-[B7](#b7--connect-tools); flag it now so the user has their Google Drive ID and a
-Drive refresh token ready, and don't consider the setup "done" until the bot
-answers a question from their real docs (unless they explicitly decline).
+not just the model's training — and it can edit those documents, not only quote
+them. You'll wire the `GOOGLE_*` + `DRIVE_ID` vars in
+[B7](#b7--connect-tools); flag it now so the user has their Google Drive ID ready
+plus a refresh token from an account with **edit** rights on that drive, and
+don't consider the setup "done" until the bot answers a question from their real
+docs (unless they explicitly decline).
 
 Have the **user** paste each value at the prompt (values never enter the
 chat):
@@ -443,15 +445,21 @@ install** — it's the default connection and the reason the bot is useful on da
 one; do it before asking about the others, and only skip it if the user
 explicitly declines. Then ask which of the remaining tools they want.
 
-**Knowledge base (Google Drive) — the default connection, set this up.** Gives
-the bot `kbSearch` / `kbReadFile` / `kbListFolders` (+ `kbCreateNote` with a
-notes folder, and `kbEditFile` / `kbCreateFile` with `KB_WRITE_ENABLED`). Needs
-a Google OAuth client + refresh token:
+**Knowledge base (Google Drive) — the default connection, set this up.** This is
+**read *and* write**: the bot searches and reads the drive (`kbSearch`,
+`kbRecentNotes`, `kbReadFile`, `kbListFolders`) *and* maintains it — `kbEditFile`
+edits an existing text file in place (ticking off a checklist item, correcting a
+line), `kbCreateFile` writes a new file into any folder, `kbCreateNote` saves a
+structured note into `NOTES_FOLDER_ID`. Tell the user that plainly: the bot will
+change documents when asked, Drive version history is the undo, and
+`KB_WRITE_ENABLED=false` makes the deployment read-only if they don't want it.
+Needs a Google OAuth client + refresh token:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
    *(offer to drive)*: create (or reuse) a project → **OAuth client ID** →
    type **Desktop app**. Enable the **Google Drive API** for the project.
-2. Mint a refresh token for the Google account that can read the Drive:
+2. Mint a refresh token for a Google account with **edit** rights on the drive
+   (viewer-only searches and reads fine, then fails on the first edit):
    easiest is [OAuth Playground](https://developers.google.com/oauthplayground)
    with "Use your own OAuth credentials" checked, scope
    `https://www.googleapis.com/auth/drive`, then Exchange authorization code →
@@ -459,10 +467,37 @@ a Google OAuth client + refresh token:
 3. Set: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`
    (or `GOOGLE_DRIVE_REFRESH_TOKEN`), and `DRIVE_ID` — the shared-drive ID
    from its URL (`https://drive.google.com/drive/folders/<DRIVE_ID>`).
-   Optional: `NOTES_FOLDER_ID` (enables saving notes), `KB_WRITE_ENABLED=true`
-   (lets the bot edit existing text files and create files in any folder —
-   `kbEditFile` / `kbCreateFile`; needs edit rights on the drive), `KB_NAME`
-   (what the bot calls it).
+   Optional: `NOTES_FOLDER_ID` (enables `kbCreateNote`, and becomes the default
+   destination for `kbCreateFile`), `KB_NAME` (what the bot calls it),
+   `KB_WRITE_ENABLED=false` (only if they want a read-only bot — writing is on
+   by default).
+
+Run from the `bot/` directory of the clone; the **user** pastes each value at the
+prompt (nothing enters the chat), and the redeploy is what actually applies them:
+
+```sh
+vercel env add GOOGLE_CLIENT_ID production
+vercel env add GOOGLE_CLIENT_SECRET production
+vercel env add GOOGLE_REFRESH_TOKEN production
+vercel env add DRIVE_ID production
+vercel env add NOTES_FOLDER_ID production      # optional, enables saved notes
+vercel --prod                                  # env is baked at deploy time
+```
+
+Then verify both halves in Slack, not just one:
+
+- **Read** — "search the knowledge base for <something they know is in it>".
+- **Write** — "add a line to <some scratch file> saying hello" or "tick the first
+  item off <a checklist>". The bot should report what it changed and link the
+  file; open the file's Drive version history to show the edit is reversible.
+- `/botstatus` reports `knowledgeBase: ok — read and write` (or `ok — read-only`
+  if they set `KB_WRITE_ENABLED=false`).
+
+**Upgrading a bot deployed before write access existed:** env vars alone won't do
+it — the code has to be redeployed. From their clone: `git pull`, then
+`cd bot && vercel --prod`. Nothing changes on the Slack side (no new scopes, no
+app-manifest change, no re-install) because all writing happens against Google
+Drive, not Slack.
 
 **Linear** — set `LINEAR_API_KEY` (Linear → Settings → Security & access →
 API keys). The bot discovers teams itself via `linearListTeams`.
@@ -563,6 +598,20 @@ These are the exact traps a real end-to-end setup hit — check them in order:
   forgot to redeploy after adding it. `vercel env ls` then `vercel --prod`.
 - **Slack shows "dispatch_failed"** on events → the deployment is erroring
   before ack; read the logs.
+- **The bot says it can only read the knowledge base** → it's running code from
+  before write access shipped, or `KB_WRITE_ENABLED=false`. `git pull` in their
+  clone, then `cd bot && vercel --prod`. `/botstatus` should then say
+  `knowledgeBase: ok — read and write`.
+- **An edit fails with a permission error** → the Google account behind
+  `GOOGLE_REFRESH_TOKEN` has viewer-only access to the drive. Search and read
+  work, writes don't. Give that account editor rights on the shared drive (or
+  mint the token from an account that has them).
+- **"Cannot edit … it is a Google document"** → correct and expected. Google
+  Docs/Sheets/Slides aren't text files; only `.md`, `.txt`, `.csv`, `.json`,
+  `.yaml` can be rewritten. Ask the bot to create a markdown file instead.
+- **"is not a Drive folder ID"** or a Drive `File not found` on a folder → the
+  agent passed a folder *name* or path. Folder IDs come from `kbListFolders`;
+  searching by name is that tool's `query` argument.
 
 ## Part B completion checklist
 
@@ -572,7 +621,7 @@ These are the exact traps a real end-to-end setup hit — check them in order:
 - [ ] 👀 reaction produced a thread summary (emoji actions live)
 - [ ] App icon uploaded (or the user explicitly skipped branding)
 - [ ] Knowledge base connected and answering from real docs (unless the user
-      declined)
+      declined), **and** a test edit written back to a real file
 - [ ] Any extra tools the user chose are live
 - [ ] All secrets went straight from the user into `vercel env add` — never
       through the chat

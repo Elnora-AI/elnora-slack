@@ -40,9 +40,9 @@ export function toolGroups(): ToolGroup[] {
 		hasGoogleOAuth() &&
 		!!(process.env.GOOGLE_DRIVE_REFRESH_TOKEN || process.env.GOOGLE_REFRESH_TOKEN) &&
 		!!process.env.DRIVE_ID;
-	// Editing existing files and writing outside the notes folder is a bigger
-	// blast radius than saving a note, so it stays behind its own opt-in flag.
-	const kbWriteEnabled = /^(1|true|yes)$/i.test(process.env.KB_WRITE_ENABLED?.trim() ?? "");
+	// The bot is meant to maintain the knowledge base, not just read it, so
+	// editing and creating files ship on (KB_WRITE_ENABLED=false opts out).
+	const kbWriteEnabled = kb.kbWriteEnabled();
 	const kbTools: ToolSet = {
 		kbSearch: kb.kbSearch,
 		kbRecentNotes: kb.kbRecentNotes,

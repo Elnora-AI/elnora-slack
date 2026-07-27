@@ -92,21 +92,26 @@ describe("tool registry gating", () => {
 		expect(tools).toHaveProperty("kbRecentNotes");
 	});
 
-	it("kbEditFile and kbCreateFile only register when KB_WRITE_ENABLED is on", () => {
+	it("kbEditFile and kbCreateFile ship on, and KB_WRITE_ENABLED=false opts out", () => {
 		vi.stubEnv("GOOGLE_CLIENT_ID", "cid");
 		vi.stubEnv("GOOGLE_CLIENT_SECRET", "csec");
 		vi.stubEnv("GOOGLE_DRIVE_REFRESH_TOKEN", "rtok");
 		vi.stubEnv("DRIVE_ID", "0ABCdrive");
 
+		// Default install — the same read+write bot every deployment gets.
 		let tools = buildTools();
 		expect(tools).toHaveProperty("kbListFolders");
+		expect(tools).toHaveProperty("kbEditFile");
+		expect(tools).toHaveProperty("kbCreateFile");
+
+		vi.stubEnv("KB_WRITE_ENABLED", "false");
+		tools = buildTools();
+		expect(tools).toHaveProperty("kbSearch");
 		expect(tools).not.toHaveProperty("kbEditFile");
 		expect(tools).not.toHaveProperty("kbCreateFile");
 
 		vi.stubEnv("KB_WRITE_ENABLED", "true");
-		tools = buildTools();
-		expect(tools).toHaveProperty("kbEditFile");
-		expect(tools).toHaveProperty("kbCreateFile");
+		expect(buildTools()).toHaveProperty("kbEditFile");
 	});
 
 	it("GOOGLE_REFRESH_TOKEN with OAuth creds enables Gmail and Calendar", () => {
