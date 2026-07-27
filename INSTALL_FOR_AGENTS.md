@@ -444,7 +444,8 @@ one; do it before asking about the others, and only skip it if the user
 explicitly declines. Then ask which of the remaining tools they want.
 
 **Knowledge base (Google Drive) — the default connection, set this up.** Gives
-the bot `kbSearch` / `kbReadFile` (+ `kbCreateNote` with a notes folder). Needs
+the bot `kbSearch` / `kbReadFile` / `kbListFolders` (+ `kbCreateNote` with a
+notes folder, and `kbEditFile` / `kbCreateFile` with `KB_WRITE_ENABLED`). Needs
 a Google OAuth client + refresh token:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
@@ -458,8 +459,10 @@ a Google OAuth client + refresh token:
 3. Set: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`
    (or `GOOGLE_DRIVE_REFRESH_TOKEN`), and `DRIVE_ID` — the shared-drive ID
    from its URL (`https://drive.google.com/drive/folders/<DRIVE_ID>`).
-   Optional: `NOTES_FOLDER_ID` (enables saving notes), `KB_NAME` (what the
-   bot calls it).
+   Optional: `NOTES_FOLDER_ID` (enables saving notes), `KB_WRITE_ENABLED=true`
+   (lets the bot edit existing text files and create files in any folder —
+   `kbEditFile` / `kbCreateFile`; needs edit rights on the drive), `KB_NAME`
+   (what the bot calls it).
 
 **Linear** — set `LINEAR_API_KEY` (Linear → Settings → Security & access →
 API keys). The bot discovers teams itself via `linearListTeams`.

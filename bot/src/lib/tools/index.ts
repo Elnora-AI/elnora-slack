@@ -40,20 +40,30 @@ export function toolGroups(): ToolGroup[] {
 		hasGoogleOAuth() &&
 		!!(process.env.GOOGLE_DRIVE_REFRESH_TOKEN || process.env.GOOGLE_REFRESH_TOKEN) &&
 		!!process.env.DRIVE_ID;
-	const kbTools: ToolSet = process.env.NOTES_FOLDER_ID
-		? {
-				kbSearch: kb.kbSearch,
-				kbRecentNotes: kb.kbRecentNotes,
-				kbReadFile: kb.kbReadFile,
-				kbCreateNote: kb.kbCreateNote,
-			}
-		: { kbSearch: kb.kbSearch, kbRecentNotes: kb.kbRecentNotes, kbReadFile: kb.kbReadFile };
+	// Editing existing files and writing outside the notes folder is a bigger
+	// blast radius than saving a note, so it stays behind its own opt-in flag.
+	const kbWriteEnabled = /^(1|true|yes)$/i.test(process.env.KB_WRITE_ENABLED?.trim() ?? "");
+	const kbTools: ToolSet = {
+		kbSearch: kb.kbSearch,
+		kbRecentNotes: kb.kbRecentNotes,
+		kbReadFile: kb.kbReadFile,
+		kbListFolders: kb.kbListFolders,
+	};
+	if (process.env.NOTES_FOLDER_ID) kbTools.kbCreateNote = kb.kbCreateNote;
+	if (kbWriteEnabled) {
+		kbTools.kbEditFile = kb.kbEditFile;
+		kbTools.kbCreateFile = kb.kbCreateFile;
+	}
 
 	return [
 		{
 			key: "knowledge-base",
 			label: "Knowledge base",
-			promptHint: `Search and read the ${KB_NAME()} (\`kbSearch\`, \`kbReadFile\`${process.env.NOTES_FOLDER_ID ? ", save notes with `kbCreateNote`" : ""}). This is the default place to look for internal docs, policies, templates, and procedures. For "latest/newest note" or date-scoped questions use \`kbRecentNotes\` (recency-ordered) — \`kbSearch\` ranks by keyword relevance, not recency, though it also accepts sort='newest' and date filters.`,
+			promptHint: `Search and read the ${KB_NAME()} (\`kbSearch\`, \`kbReadFile\`, browse folders with \`kbListFolders\`${process.env.NOTES_FOLDER_ID ? ", save notes with `kbCreateNote`" : ""}). This is the default place to look for internal docs, policies, templates, and procedures. For "latest/newest note" or date-scoped questions use \`kbRecentNotes\` (recency-ordered) — \`kbSearch\` ranks by keyword relevance, not recency, though it also accepts sort='newest' and date filters.${
+				kbWriteEnabled
+					? ` You can also change it: \`kbEditFile\` edits an existing text file in place (read it first, then replace an exact stretch of text — this is how you tick off checklist items or amend a doc), and \`kbCreateFile\` writes a new file into any folder. Say what you changed and link the file; Drive keeps version history, so edits are reversible.`
+					: ""
+			}`,
 			enabled: kbReadEnabled,
 			tools: kbTools,
 		},

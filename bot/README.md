@@ -113,9 +113,19 @@ connecting a knowledge base is the one tool you set up as part of the standard
 install, not an afterthought. It's a Google Drive shared drive (or folder): the
 bot gets `kbSearch` (full-text search, with `sort='newest'` and date filters),
 `kbRecentNotes` (newest notes first, for "latest note" / date-scoped questions),
-`kbReadFile` (read a document by ID), and `kbCreateNote` (save a markdown note
-back). Ask for "the newest note" or "notes from this week about X" and it uses
-the recency tools instead of an arbitrary keyword match.
+`kbReadFile` (read a document by ID), `kbListFolders` (browse the folder tree),
+and `kbCreateNote` (save a markdown note back). Ask for "the newest note" or
+"notes from this week about X" and it uses the recency tools instead of an
+arbitrary keyword match.
+
+Set `KB_WRITE_ENABLED=true` and it can also *change* the knowledge base:
+`kbEditFile` edits an existing text file in place (read it, then replace an exact
+stretch of text — this is how "tick those three off the task list" or "fix that
+line in the runbook" works) and `kbCreateFile` writes a new file into any folder,
+not just the notes folder. Plain-text files only (`.md`, `.txt`, `.csv`, `.json`,
+`.yaml`) — Google Docs and Sheets are rejected, since they aren't text. The token
+needs the full `drive` scope and edit rights on the drive; Drive version history
+is the undo. Leave the flag unset for a read-only bot.
 
 Four env vars turn it on:
 
@@ -127,8 +137,8 @@ Four env vars turn it on:
 | `DRIVE_ID` | which drive holds the docs | the ID in `drive.google.com/drive/folders/<DRIVE_ID>` |
 
 Then optionally `NOTES_FOLDER_ID` (folder where new notes are saved — enables
-`kbCreateNote`) and `KB_NAME` (what the bot calls it, e.g. "Acme knowledge
-vault"). Enable the **Google Drive API** on the project, `vercel --prod`, and ask
+`kbCreateNote`), `KB_WRITE_ENABLED` (see above), and `KB_NAME` (what the bot
+calls it, e.g. "Acme knowledge vault"). Enable the **Google Drive API** on the project, `vercel --prod`, and ask
 the bot in Slack to "search the knowledge base for X" to confirm. The
 `GOOGLE_REFRESH_TOKEN` also lights up Gmail and Calendar once their scopes are on
 the token (the Drive-only `GOOGLE_DRIVE_REFRESH_TOKEN` does not). Step-by-step

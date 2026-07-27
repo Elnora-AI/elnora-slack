@@ -1,10 +1,12 @@
 /**
  * Knowledge base tools — a Google Drive folder or shared drive as the org's
  * default source of truth. Enabled when Google OAuth creds + DRIVE_ID are set;
- * note creation additionally needs NOTES_FOLDER_ID.
+ * note creation additionally needs NOTES_FOLDER_ID, and editing/creating
+ * arbitrary files additionally needs KB_WRITE_ENABLED.
  *
  *   DRIVE_ID — the shared drive (or My Drive folder) that holds the docs
  *   NOTES_FOLDER_ID — folder where new notes are created
+ *   KB_WRITE_ENABLED — "true" to allow kbEditFile / kbCreateFile
  *   KB_NAME — display name used in tool descriptions (default "knowledge base")
  */
 
@@ -185,13 +187,32 @@ export const kbRecentNotes = tool({
 	},
 });
 
+/** Max characters returned by a single kbReadFile call. */
+const READ_WINDOW = 15000;
+
+/** Window a file's text, reporting whether more remains after it. */
+function readWindow(content: string, offset: number) {
+	const start = Math.min(offset, content.length);
+	return {
+		content: content.slice(start, start + READ_WINDOW),
+		offset: start,
+		truncated: content.length > start + READ_WINDOW,
+		totalLength: content.length,
+	};
+}
+
 export const kbReadFile = tool({
-	description: `Read the contents of a ${KB_NAME} file by its file ID. Use after kbSearch to read a specific document.`,
+	description: `Read the contents of a ${KB_NAME} file by its file ID. Use after kbSearch to read a specific document. Long files come back in ${READ_WINDOW}-character windows — when the result says truncated, call again with offset set to the end of the previous window.`,
 	inputSchema: z.object({
 		fileId: z.string().max(200).describe("Google Drive file ID from kbSearch results"),
 		fileName: z.string().max(500).optional().describe("File name for context (not required)"),
+		offset: z
+			.number()
+			.optional()
+			.default(0)
+			.describe(`Character offset to start reading from — use to page through a file longer than ${READ_WINDOW} chars`),
 	}),
-	execute: async ({ fileId }) => {
+	execute: async ({ fileId, offset }) => {
 		const drive = getDriveClient();
 
 		try {
@@ -201,11 +222,7 @@ export const kbReadFile = tool({
 				mimeType: "text/plain",
 			});
 			const content = typeof res.data === "string" ? res.data : String(res.data);
-			return {
-				content: content.slice(0, 15000),
-				truncated: content.length > 15000,
-				totalLength: content.length,
-			};
+			return readWindow(content, offset);
 		} catch {
 			// For non-Google files (markdown, plain text), try downloading content
 			try {
@@ -214,11 +231,7 @@ export const kbReadFile = tool({
 					alt: "media",
 				});
 				const content = typeof res.data === "string" ? res.data : String(res.data);
-				return {
-					content: content.slice(0, 15000),
-					truncated: content.length > 15000,
-					totalLength: content.length,
-				};
+				return readWindow(content, offset);
 			} catch {
 				return {
 					error: "Could not read file. It may be a binary file (PDF, image). Use the URL to view it directly.",
@@ -329,6 +342,223 @@ Before calling: run kbSearch to find related notes and populate \`related\`. Onl
 		} catch (err) {
 			console.error("Knowledge base create note error:", err);
 			return { error: "Failed to create note — check deployment logs" };
+		}
+	},
+});
+
+/**
+ * Filenames the write tools accept: plain-text formats only, and no character
+ * that could alter the Drive query they get interpolated into.
+ */
+const WRITABLE_FILENAME = /^[\w][\w .()-]{0,150}\.(md|markdown|txt|csv|json|yaml|yml)$/;
+
+/** Google-native docs (Docs/Sheets/Slides) can't be rewritten as plain text. */
+function isGoogleNative(mimeType: string | null | undefined): boolean {
+	return !!mimeType?.startsWith("application/vnd.google-apps");
+}
+
+export const kbListFolders = tool({
+	description: `List folders in the ${KB_NAME} so you can find where a file lives or where to put a new one. Search the whole drive by name, or list the children of one folder to walk the tree.`,
+	inputSchema: z.object({
+		query: z
+			.string()
+			.max(200)
+			.optional()
+			.describe("Match folders whose name contains this text — e.g. 'tasks', 'policies'. Omit to list everything."),
+		parentFolderId: z
+			.string()
+			.max(200)
+			.optional()
+			.describe("List only folders directly inside this folder. Omit to search the whole knowledge base."),
+		limit: z.number().optional().default(25).pipe(z.number().max(100)),
+	}),
+	execute: async ({ query, parentFolderId, limit }) => {
+		const driveId = process.env.DRIVE_ID;
+		if (!driveId) return { error: "DRIVE_ID not configured — knowledge base unavailable" };
+
+		const clauses = ["mimeType = 'application/vnd.google-apps.folder'", "trashed = false"];
+		if (parentFolderId) clauses.push(`'${sanitizeDriveQuery(parentFolderId)}' in parents`);
+		if (query) {
+			const safeQuery = sanitizeDriveQuery(query);
+			if (safeQuery) clauses.push(`name contains '${safeQuery}'`);
+		}
+
+		try {
+			const drive = getDriveClient();
+			const res = await drive.files.list({
+				q: clauses.join(" and "),
+				driveId,
+				corpora: "drive",
+				includeItemsFromAllDrives: true,
+				supportsAllDrives: true,
+				orderBy: "name",
+				fields: "files(id,name,webViewLink)",
+				pageSize: limit,
+			});
+			return (res.data.files ?? []).map((folder) => ({
+				name: folder.name,
+				id: folder.id,
+				url: folder.webViewLink,
+			}));
+		} catch (err) {
+			console.error("Knowledge base list-folders failed:", err instanceof Error ? err.message : String(err));
+			return { error: "Failed to list folders — check deployment logs" };
+		}
+	},
+});
+
+export const kbEditFile = tool({
+	description: `Edit an existing text file in the ${KB_NAME} in place by replacing an exact stretch of its text — use this to tick off a checklist item, correct a line, or add a section to a file that already exists.
+
+Read the file with kbReadFile first and copy \`oldText\` from it verbatim, including indentation and markdown markers (e.g. "- [ ] " vs "- [x] "). \`oldText\` must match exactly once unless you set replaceAll. To append, match the last line of the file and put it back followed by the new content.
+
+Only plain-text files work (.md, .txt, .csv, .json, .yaml) — Google Docs/Sheets and binaries are rejected. The edit overwrites the file, but Drive keeps full version history, so it can be reverted.`,
+	inputSchema: z.object({
+		fileId: z.string().max(200).describe("Google Drive file ID from kbSearch / kbRecentNotes"),
+		oldText: z.string().min(1).max(50000).describe("Exact text to replace, copied verbatim from the file"),
+		newText: z.string().max(50000).describe("Replacement text — empty string deletes the matched text"),
+		replaceAll: z
+			.boolean()
+			.optional()
+			.default(false)
+			.describe("Replace every occurrence. Leave false to require a unique match (safer)."),
+	}),
+	execute: async ({ fileId, oldText, newText, replaceAll }) => {
+		if (oldText === newText) return { error: "oldText and newText are identical — nothing to change" };
+
+		const drive = getDriveClient();
+
+		try {
+			const meta = await drive.files.get({
+				fileId,
+				fields: "id,name,mimeType,webViewLink",
+				supportsAllDrives: true,
+			});
+			const mimeType = meta.data.mimeType;
+			if (isGoogleNative(mimeType)) {
+				return {
+					error: `Cannot edit "${meta.data.name}" — it is a Google ${mimeType?.split(".").pop()} document, not a plain-text file. Open it via its URL to edit.`,
+				};
+			}
+
+			const res = await drive.files.get({ fileId, alt: "media" }, { responseType: "text" });
+			const content = typeof res.data === "string" ? res.data : String(res.data);
+
+			const occurrences = content.split(oldText).length - 1;
+			if (occurrences === 0) {
+				return {
+					error:
+						"oldText was not found in the file. Read the file again with kbReadFile and copy the text exactly, including whitespace and markdown markers.",
+				};
+			}
+			if (occurrences > 1 && !replaceAll) {
+				return {
+					error: `oldText matches ${occurrences} places. Include more surrounding lines to make it unique, or set replaceAll: true.`,
+				};
+			}
+
+			const updated = replaceAll ? content.split(oldText).join(newText) : content.replace(oldText, newText);
+
+			const written = await drive.files.update({
+				fileId,
+				media: {
+					mimeType: mimeType || "text/plain",
+					body: Readable.from(Buffer.from(updated, "utf-8")),
+				},
+				fields: "id,name,webViewLink",
+				supportsAllDrives: true,
+			});
+
+			return {
+				success: true,
+				name: written.data.name,
+				url: written.data.webViewLink,
+				id: written.data.id,
+				replacements: replaceAll ? occurrences : 1,
+			};
+		} catch (err) {
+			console.error("Knowledge base edit file error:", err);
+			return { error: "Failed to edit file — it may be read-only or binary. Check deployment logs." };
+		}
+	},
+});
+
+export const kbCreateFile = tool({
+	description: `Create a new text file anywhere in the ${KB_NAME} — a document, report, spreadsheet-style CSV, or any markdown file that is not a saved-reading note (for those use kbCreateNote).
+
+Find the destination with kbListFolders and pass its \`folderId\`; without one the file lands in the default notes folder. Markdown files should open with YAML frontmatter (title, created, updated, tags, description) to match the rest of the ${KB_NAME}. If a file with that name already exists, this returns it untouched — edit it with kbEditFile instead of creating a second copy.`,
+	inputSchema: z.object({
+		fileName: z
+			.string()
+			.max(160)
+			.regex(WRITABLE_FILENAME, "Must be a plain filename ending in .md, .txt, .csv, .json, .yaml or .yml")
+			.describe("Filename with extension, e.g. 'q3-lab-throughput.md' — no slashes"),
+		content: z.string().max(200000).describe("Full file content"),
+		folderId: z
+			.string()
+			.max(200)
+			.optional()
+			.describe("Destination folder ID from kbListFolders. Omit to use the default notes folder."),
+	}),
+	execute: async ({ fileName, content, folderId }) => {
+		const targetFolder = folderId || process.env.NOTES_FOLDER_ID;
+		if (!targetFolder) {
+			return { error: "No folderId given and NOTES_FOLDER_ID is not configured — use kbListFolders to pick a folder" };
+		}
+
+		const extension = fileName.split(".").pop()?.toLowerCase();
+		const mimeType =
+			extension === "md" || extension === "markdown"
+				? "text/markdown"
+				: extension === "csv"
+					? "text/csv"
+					: extension === "json"
+						? "application/json"
+						: "text/plain";
+
+		try {
+			const drive = getDriveClient();
+
+			// Same idempotency guard as kbCreateNote: Drive happily creates a second
+			// "name (1)" file on a retry, so return the existing one instead.
+			// fileName is regex-validated, so it's safe to interpolate.
+			const existing = await drive.files.list({
+				q: `name = '${fileName}' and '${targetFolder}' in parents and trashed = false`,
+				corpora: "drive",
+				driveId: process.env.DRIVE_ID,
+				includeItemsFromAllDrives: true,
+				supportsAllDrives: true,
+				fields: "files(id,name,webViewLink)",
+				pageSize: 1,
+			});
+			const dupe = existing.data.files?.[0];
+			if (dupe) {
+				return {
+					success: true,
+					alreadyExists: true,
+					name: dupe.name,
+					url: dupe.webViewLink,
+					id: dupe.id,
+					message: "A file with this name already exists in that folder — use kbEditFile to change it.",
+				};
+			}
+
+			const res = await drive.files.create({
+				requestBody: { name: fileName, mimeType, parents: [targetFolder] },
+				media: { mimeType, body: Readable.from(Buffer.from(content, "utf-8")) },
+				fields: "id,name,webViewLink",
+				supportsAllDrives: true,
+			});
+
+			return {
+				success: true,
+				name: res.data.name,
+				url: res.data.webViewLink,
+				id: res.data.id,
+			};
+		} catch (err) {
+			console.error("Knowledge base create file error:", err);
+			return { error: "Failed to create file — check the folder ID and deployment logs" };
 		}
 	},
 });
