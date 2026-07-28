@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.1...v0.3.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* **deps:** ship @slack/web-api v8 in the published CLI ([#64](https://github.com/Elnora-AI/elnora-slack/issues/64)) ([682e1b1](https://github.com/Elnora-AI/elnora-slack/commit/682e1b1abe6eec647526a2270b08440b29fc155c))
+
 ## [0.3.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.0...v0.3.1) (2026-07-28)
 
 
