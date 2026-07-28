@@ -45,8 +45,8 @@ importers:
         specifier: ^4.0.23
         version: 4.0.23(zod@4.4.3)
       '@ai-sdk/google':
-        specifier: ^3.0.0
-        version: 3.0.92(zod@4.4.3)
+        specifier: ^4.0.27
+        version: 4.0.27(zod@4.4.3)
       '@ai-sdk/openai':
         specifier: ^3.0.0
         version: 3.0.85(zod@4.4.3)
@@ -123,9 +123,9 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@3.0.92':
-    resolution: {integrity: sha512-h3tECVUZVXmFuu53+zu79R3eqWL517LFEdcThB86mNhOgGjJO1Sv8b3Zr3tJlZ+EKFZt85egkyrgqyhaCIMm2Q==}
-    engines: {node: '>=18'}
+  '@ai-sdk/google@4.0.27':
+    resolution: {integrity: sha512-u44UuLypwwHqEaHPRV1iZ1N+xO9dCKzQX6L2DtPPxvlsSdSzNobUBz8oaDv6NzC35qYSb6JFs7TG1Tz2Nxlg/Q==}
+    engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
@@ -1914,10 +1914,10 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
-  '@ai-sdk/google@3.0.92(zod@4.4.3)':
+  '@ai-sdk/google@4.0.27(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 3.0.14
-      '@ai-sdk/provider-utils': 4.0.39(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.4
+      '@ai-sdk/provider-utils': 5.0.14(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/openai@3.0.85(zod@4.4.3)':
