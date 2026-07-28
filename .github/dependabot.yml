@@ -5,6 +5,15 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      # chat and its adapters are pinned to the same exact version and are wired
+      # together in bot/src/lib/bot.ts. Bumping one alone puts two copies of
+      # `chat` in the tree and the typecheck fails on mismatched message types,
+      # so they have to move in one PR.
+      chat-sdk:
+        patterns:
+          - "chat"
+          - "@chat-adapter/*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
