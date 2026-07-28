@@ -57,8 +57,8 @@ importers:
         specifier: 4.34.0
         version: 4.34.0(ai@7.0.37(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-redis':
-        specifier: 4.34.0
-        version: 4.34.0(@opentelemetry/api@1.9.1)(ai@7.0.37(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.35.0
+        version: 4.35.0(@opentelemetry/api@1.9.1)(ai@7.0.37(zod@4.4.3))(zod@4.4.3)
       '@linear/sdk':
         specifier: ^88.0.0
         version: 88.3.0(graphql@17.0.2)
@@ -234,8 +234,8 @@ packages:
     resolution: {integrity: sha512-voZQK+bAz6RLwUDb582f+Wub5aChp6eVqtHAGjf1gAYFUKcIy54k0JA540jG1ZHLym6m0kIH5FjVXDCDb5DLng==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-redis@4.34.0':
-    resolution: {integrity: sha512-/RObcFIww08c9zC8fiAmQfE8Si4jHWscFHIRhInDQNI3l/sFYiMHBpBXgMFwUTirQHUABHPCV8W8NRHRTtUJsA==}
+  '@chat-adapter/state-redis@4.35.0':
+    resolution: {integrity: sha512-jSMlXLLXU989rExqYm0FvBHbV+qRQwq3RKtqT/C4K5wCxQ5TGqdRzgVhQmkYnPRPZ9/TmRNozQePdfckqaLSWA==}
     engines: {node: '>=20'}
 
   '@emnapi/core@1.11.1':
@@ -1074,6 +1074,21 @@ packages:
       zod: ^3.0.0 || ^4.0.0
     peerDependenciesMeta:
       ai:
+        optional: true
+      zod:
+        optional: true
+
+  chat@4.35.0:
+    resolution: {integrity: sha512-IUbdgTBvgs/XYhKcpKGrpmZgcl8KcA5NZ+eOww+0rBdhPf+95INjcUauQTk5e48UI1V4PRg9stToPsT4vle07g==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      ai: ^6.0.182 || ^7.0.0
+      workflow: ^5.0.0-beta.35
+      zod: ^3.0.0 || ^4.0.0
+    peerDependenciesMeta:
+      ai:
+        optional: true
+      workflow:
         optional: true
       zod:
         optional: true
@@ -2023,15 +2038,16 @@ snapshots:
       - supports-color
       - zod
 
-  '@chat-adapter/state-redis@4.34.0(@opentelemetry/api@1.9.1)(ai@7.0.37(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-redis@4.35.0(@opentelemetry/api@1.9.1)(ai@7.0.37(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.34.0(ai@7.0.37(zod@4.4.3))(zod@4.4.3)
+      chat: 4.35.0(ai@7.0.37(zod@4.4.3))(zod@4.4.3)
       redis: 5.12.1(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@node-rs/xxhash'
       - '@opentelemetry/api'
       - ai
       - supports-color
+      - workflow
       - zod
 
   '@emnapi/core@1.11.1':
@@ -2616,6 +2632,21 @@ snapshots:
   character-entities@2.0.2: {}
 
   chat@4.34.0(ai@7.0.37(zod@4.4.3))(zod@4.4.3):
+    dependencies:
+      '@workflow/serde': 4.1.0-beta.2
+      mdast-util-to-string: 4.0.0
+      remark-gfm: 4.0.1
+      remark-parse: 11.0.0
+      remark-stringify: 11.0.0
+      remend: 1.3.0
+      unified: 11.0.5
+    optionalDependencies:
+      ai: 7.0.37(zod@4.4.3)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  chat@4.35.0(ai@7.0.37(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0

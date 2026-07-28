@@ -14,7 +14,7 @@
     "@ai-sdk/anthropic": "^4.0.23",
     "@chat-adapter/slack": "4.34.0",
     "@chat-adapter/state-memory": "4.34.0",
-    "@chat-adapter/state-redis": "4.34.0",
+    "@chat-adapter/state-redis": "4.35.0",
     "@linear/sdk": "^88.0.0",
     "@slack/web-api": "^7.19.0",
     "ai": "^7.0.31",
