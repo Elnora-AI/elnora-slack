@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.0...v0.3.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **deps:** bump the chat SDK family to 4.35.0 in lockstep ([#56](https://github.com/Elnora-AI/elnora-slack/issues/56)) ([26d323a](https://github.com/Elnora-AI/elnora-slack/commit/26d323af581511bf58d2e144afa94deb788b86af))
+
 ## [0.3.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.2.0...v0.3.0) (2026-07-27)
 
 
