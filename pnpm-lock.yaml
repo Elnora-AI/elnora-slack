@@ -60,8 +60,8 @@ importers:
         specifier: 4.39.0
         version: 4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       '@linear/sdk':
-        specifier: ^90.0.0
-        version: 90.0.0(graphql@17.0.2)
+        specifier: ^92.0.0
+        version: 92.0.0(graphql@17.0.2)
       '@slack/web-api':
         specifier: ^8.0.0
         version: 8.1.1
@@ -563,8 +563,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@linear/sdk@90.0.0':
-    resolution: {integrity: sha512-sSM5V7m2ukm4eZn0qU5jjp3IASmuPis0GPpHKbN1aPrCWJojQUvIP8NeehQiWFizWGCBaHDC+3kpuyDG1rDbnQ==}
+  '@linear/sdk@92.0.0':
+    resolution: {integrity: sha512-MDqvUcgkvVNg//ivlJx2a4d9bjELrMo2h5qK0xc6hYABTV98oAOsZkepd9RV8n5j1rqfA5vJsQNeIC5en40TkQ==}
     engines: {node: '>=18.x'}
 
   '@next/env@16.2.12':
@@ -2388,7 +2388,7 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@linear/sdk@90.0.0(graphql@17.0.2)':
+  '@linear/sdk@92.0.0(graphql@17.0.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@17.0.2)
     transitivePeerDependencies:
