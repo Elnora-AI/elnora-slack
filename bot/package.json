@@ -17,7 +17,7 @@
     "@chat-adapter/slack": "4.39.0",
     "@chat-adapter/state-memory": "4.39.0",
     "@chat-adapter/state-redis": "4.39.0",
-    "@linear/sdk": "^90.0.0",
+    "@linear/sdk": "^92.0.0",
     "@slack/web-api": "^8.0.0",
     "ai": "^7.0.41",
     "chat": "4.39.0",
