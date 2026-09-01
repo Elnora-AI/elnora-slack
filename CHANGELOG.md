@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.2...v0.3.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **deps:** bump next to 16.3.4 in the bot template ([#90](https://github.com/Elnora-AI/elnora-slack/issues/90)) ([c8205c3](https://github.com/Elnora-AI/elnora-slack/commit/c8205c3d72bc918da79c542a50b4da8b0c79506a))
+* **deps:** raise the postcss override to &gt;=8.5.26 to close GHSA-2v37-7h3g-55p8 ([#88](https://github.com/Elnora-AI/elnora-slack/issues/88)) ([4aeccea](https://github.com/Elnora-AI/elnora-slack/commit/4aeccea5b1c11e760685a7cefcc55976b80c0bcc))
+
 ## [0.3.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.1...v0.3.2) (2026-07-28)
 
 
