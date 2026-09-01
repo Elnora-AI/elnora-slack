@@ -51,14 +51,14 @@ importers:
         specifier: ^4.0.23
         version: 4.0.23(zod@4.4.3)
       '@chat-adapter/slack':
-        specifier: 4.38.1
-        version: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.39.0
+        version: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-memory':
-        specifier: 4.38.1
-        version: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.39.0
+        version: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-redis':
-        specifier: 4.38.1
-        version: 4.38.1(@opentelemetry/api@1.9.1)(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.39.0
+        version: 4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       '@linear/sdk':
         specifier: ^90.0.0
         version: 90.0.0(graphql@17.0.2)
@@ -69,8 +69,8 @@ importers:
         specifier: ^7.0.41
         version: 7.0.41(zod@4.4.3)
       chat:
-        specifier: 4.38.1
-        version: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.39.0
+        version: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       googleapis:
         specifier: ^173.0.0
         version: 173.0.0
@@ -218,20 +218,20 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@chat-adapter/shared@4.38.1':
-    resolution: {integrity: sha512-zJiMl43fiS3a2RjLFdCyTUTqcDY2xss1Acbzc9yfsw8YAkS0LZRdrNmp9/RjLhZB0+FzLarNAayvdKqF2GwnQg==}
+  '@chat-adapter/shared@4.39.0':
+    resolution: {integrity: sha512-zc5mB5rYqbp4ts+Z3tG/YwkCypPYphriYpG95ZMRNGiEYx3cYZJZFmAFFM4YLfdz3VIQ99Fd0HFDYVNyAMV7cg==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/slack@4.38.1':
-    resolution: {integrity: sha512-xMZ43YUQKzqOAiePR5mEFjhJPI6/jsEHCMq9Y+Rrm+N4+DotBddQDpbGMzb5oiogZD6iyMVCMvWSPLST7ZX0sg==}
+  '@chat-adapter/slack@4.39.0':
+    resolution: {integrity: sha512-nDBYFEmD9MUobUH+HJbOYwKYcaeoCFJDXVvd41flh5sslpixSUG2SFcz7F3py62jJ9c0YYNEdwprIExO20IyZQ==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-memory@4.38.1':
-    resolution: {integrity: sha512-XYRmnnuckJ7HubQIRqKTwOn2XbpK+GQclN7mRJEpiGk/4LXD46g0XKrYPrQMGe8PGLMdSQ4139Huu34rvyfgSw==}
+  '@chat-adapter/state-memory@4.39.0':
+    resolution: {integrity: sha512-sTslMdRA9MG2MYUF9anD+eatZ1o3Nu64TkQCJ9GrGWfRCefM8DnIG/Op+Ej9XS6XjqOORb3eDJvy6IpvWrfT4A==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-redis@4.38.1':
-    resolution: {integrity: sha512-SNxn0igBRISmZI53HVdWHjlNFkn87gzSjlj+KkctnLVUd5q8ijitmip4EBg4hq7/UXiwYcxovd7En+3Jttxavg==}
+  '@chat-adapter/state-redis@4.39.0':
+    resolution: {integrity: sha512-fBubw8N2AYQM+QcShx1H+ofWGHJNgvWECVFnAd7U51OoJm5mPf79RM8ywm/nV1ZtIPHLHUivQBg1mt0x/7YwPQ==}
     engines: {node: '>=20'}
 
   '@emnapi/runtime@1.11.3':
@@ -1112,8 +1112,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.19.0:
-    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -1153,8 +1153,8 @@ packages:
   character-entities@2.0.2:
     resolution: {integrity: sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ==}
 
-  chat@4.38.1:
-    resolution: {integrity: sha512-FD6vNLT8clXHKhN3I1m+3Bn2nz0rsB6/bmNPsJeh6Cr7kwWLg0MYl2uor9YaKBp38F77sBRVKdYKVA6ihUby3w==}
+  chat@4.39.0:
+    resolution: {integrity: sha512-o7D+oAbQAYFVoc9+OH8wya11609ybRThNTF3s/5C1LAABGGi6IrxoQQEN/aIe+4h5pmKYzUjXeqTcuOZcpIAZA==}
     engines: {node: '>=20'}
     peerDependencies:
       ai: ^6.0.182 || ^7.0.0
@@ -2147,21 +2147,21 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.6':
     optional: true
 
-  '@chat-adapter/shared@4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/shared@4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+      chat: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/slack@4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/slack@4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      '@chat-adapter/shared': 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+      '@chat-adapter/shared': 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       '@slack/socket-mode': 2.0.7
       '@slack/web-api': 7.19.0
-      chat: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+      chat: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - bufferutil
@@ -2171,18 +2171,18 @@ snapshots:
       - workflow
       - zod
 
-  '@chat-adapter/state-memory@4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-memory@4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+      chat: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/state-redis@4.38.1(@opentelemetry/api@1.9.1)(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-redis@4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.41(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
+      chat: 4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3)
       redis: 5.12.1(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@node-rs/xxhash'
@@ -2570,7 +2570,7 @@ snapshots:
       '@slack/types': 2.22.0
       '@types/node': 26.3.0
       '@types/retry': 0.12.0
-      axios: 1.19.0
+      axios: 1.20.0
       eventemitter3: 5.0.4
       form-data: 4.0.6
       is-electron: 2.2.2
@@ -2774,7 +2774,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.19.0:
+  axios@1.20.0:
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.6
@@ -2812,7 +2812,7 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chat@4.38.1(ai@7.0.41(zod@4.4.3))(zod@4.4.3):
+  chat@4.39.0(ai@7.0.41(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0
