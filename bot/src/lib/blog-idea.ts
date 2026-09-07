@@ -32,7 +32,7 @@ export interface BlogWorkflowConfig {
 	token: string;
 	/** "owner/repo" holding the workflow. */
 	repo: string;
-	/** Workflow file name, e.g. "website-blog-from-ideas.yml". */
+	/** Workflow file name, e.g. "blog-from-ideas.yml". */
 	workflow: string;
 	/** Branch the workflow is dispatched on. */
 	ref: string;
