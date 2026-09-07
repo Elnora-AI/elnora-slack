@@ -26,7 +26,7 @@
     "p-retry": "^8.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "redis": "^5.12.1",
+    "redis": "^6.2.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
