@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.3...v0.3.4) (2026-09-07)
+
+
+### Features
+
+* **bot:** add /new-blog, starting a drafting workflow from an idea ([#91](https://github.com/Elnora-AI/elnora-slack/issues/91)) ([4843d3f](https://github.com/Elnora-AI/elnora-slack/commit/4843d3f354daadde37e7ce6995126a8e5c268944))
+
 ## [0.3.3](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.2...v0.3.3) (2026-09-01)
 
 
