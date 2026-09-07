@@ -19,6 +19,7 @@ import { WebClient } from "@slack/web-api";
 import { Chat } from "chat";
 import { agent } from "./agent";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
+import { blogWorkflowConfig, dispatchBlogIdea } from "./blog-idea";
 import { resolveEmojiAction } from "./emoji-actions";
 import { scrubSlackBroadcasts } from "./slack-scrub";
 import {
@@ -456,3 +457,42 @@ bot.onSlashCommand("/find", (event) =>
 bot.onSlashCommand("/botstatus", (event) =>
 	runSlashCommand(event, "Run the systemStatus tool and report which services are connected, using Slack mrkdwn."),
 );
+
+// /new-blog — start a drafting workflow from an idea, or from a link.
+//
+// The one slash command here that does NOT go through the agent. Dispatching a
+// workflow is a fixed transformation of the text, and a model that improvises
+// costs a pull request somebody then has to read and close. The text is passed
+// through verbatim; the workflow decides what to do with it.
+//
+// Registers only when the deployment configures it, so a bot without a drafting
+// pipeline does not advertise a command that cannot work.
+if (blogWorkflowConfig()) {
+	bot.onSlashCommand("/new-blog", async (event) => {
+		if (!isAuthorized(event.user.userId)) {
+			await event.channel.post(UNAUTHORIZED_MSG);
+			return;
+		}
+		const text = event.text?.trim() ?? "";
+		if (!text) {
+			await event.channel.post(
+				"Usage: `/new-blog [your idea, or a link]` — writes it up and opens a pull request.\n\n" +
+					"Say what the idea claims, in your own words, however rough. The specifics are the " +
+					"valuable part, so keep them: what you actually saw, the sentence somebody said, the " +
+					"number you remember. Paste a link and the page is read for you. The research, the " +
+					"checking and the house rules are handled.",
+			);
+			return;
+		}
+		// Echo first, for the same reason runSlashCommand does: Slack does not show
+		// the invocation when the app replies, so without this the user's message
+		// vanishes and an answer appears from nowhere.
+		try {
+			await event.channel.post(`> <@${event.user.userId}> \`${event.command} ${text}\``);
+		} catch (err) {
+			console.error("Slash command echo failed:", err instanceof Error ? err.name : "unknown");
+		}
+		const { message } = await dispatchBlogIdea(text);
+		await event.channel.post(message);
+	});
+}
