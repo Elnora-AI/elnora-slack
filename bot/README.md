@@ -21,7 +21,7 @@ Everything the bot needs, in one place. Full env reference: [`.env.example`](.en
 | **Vercel CLI** | `npm i -g vercel` (used to deploy and set env vars). |
 | **Node.js ≥ 20.9.0** | For the CLI, local build, and tests (`engines` in `package.json`). |
 | **An LLM API key** | Anthropic by default → `ANTHROPIC_API_KEY`. To use another provider set `LLM_PROVIDER=openai` (`OPENAI_API_KEY`) or `LLM_PROVIDER=google` (`GOOGLE_GENERATIVE_AI_API_KEY`). Exactly one provider key is required; override the model with `BOT_MODEL`. |
-| **A Slack app** | Created from [`app-manifest.json`](app-manifest.json) → gives `SLACK_BOT_TOKEN` (`xoxb-`) + `SLACK_SIGNING_SECRET`. The manifest's `channels:history` / `groups:history` / `im:history` / `mpim:history` scopes are what make live thread/DM memory work — don't remove them. It also registers the events and the `/ask`, `/note`, `/find`, `/botstatus` slash commands. |
+| **A Slack app** | Created from [`app-manifest.json`](app-manifest.json) → gives `SLACK_BOT_TOKEN` (`xoxb-`) + `SLACK_SIGNING_SECRET`. The manifest's `channels:history` / `groups:history` / `im:history` / `mpim:history` scopes are what make live thread/DM memory work — don't remove them. It also registers the events and the `/ask`, `/note`, `/find`, `/botstatus`, `/new-blog` slash commands. |
 
 **Strongly recommended**
 
