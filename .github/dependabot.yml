@@ -15,6 +15,15 @@ updates:
           - "chat"
           - "@chat-adapter/*"
 
+    ignore:
+      # @chat-adapter/state-redis depends on redis ^5.11.0. A major bump here
+      # does not replace redis 5 in the tree, it adds redis 6 alongside it, so
+      # bot/src/app/api/health/route.ts would ping a different client than the
+      # state adapter actually uses. The typecheck passes, so CI cannot catch
+      # it. Drop this once state-redis supports redis 6.
+      - dependency-name: "redis"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
