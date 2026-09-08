@@ -25,7 +25,7 @@ importers:
         version: 2.5.6
       '@types/node':
         specifier: ^26.2.0
-        version: 26.3.0
+        version: 26.4.1
       tsx:
         specifier: ^4.23.12
         version: 4.23.13
@@ -34,10 +34,10 @@ importers:
         version: 7.0.2
       vite:
         specifier: ^8.1.5
-        version: 8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)
+        version: 8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
 
   bot:
     dependencies:
@@ -76,7 +76,7 @@ importers:
         version: 173.0.0
       next:
         specifier: ^16.3.4
-        version: 16.3.4(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.4(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       p-retry:
         specifier: ^8.0.0
         version: 8.0.1
@@ -95,7 +95,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^26.2.0
-        version: 26.3.0
+        version: 26.4.1
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
@@ -107,7 +107,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
 
 packages:
 
@@ -903,8 +903,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@26.3.0':
-    resolution: {integrity: sha512-L3fgrnchriRC2ExBflb8j4uZZURHZfQsmQeyVzhjcHW4kkwVyo8/0h1B2MVzMTrYUJYu6G7EWs14hW/L9putqw==}
+  '@types/node@26.4.1':
+    resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
 
   '@types/react-dom@19.2.5':
     resolution: {integrity: sha512-fMPwH9v7r/pp43yUd2/Mbiex5KouJwwR3dzHkhLREUC6764VyDsqxhAxv6OFEYR1RhjOyD1naqba8ECDBe7ZQg==}
@@ -2520,17 +2520,17 @@ snapshots:
 
   '@slack/logger@4.0.1':
     dependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
 
   '@slack/logger@5.0.0':
     dependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
 
   '@slack/socket-mode@2.0.7':
     dependencies:
       '@slack/logger': 4.0.1
       '@slack/web-api': 7.19.0
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       '@types/ws': 8.18.1
       eventemitter3: 5.0.4
       ws: 8.21.3
@@ -2548,7 +2548,7 @@ snapshots:
     dependencies:
       '@slack/logger': 4.0.1
       '@slack/types': 2.22.0
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       '@types/retry': 0.12.0
       axios: 1.20.0
       eventemitter3: 5.0.4
@@ -2566,7 +2566,7 @@ snapshots:
     dependencies:
       '@slack/logger': 5.0.0
       '@slack/types': 3.1.0
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       '@types/retry': 0.12.5
       eventemitter3: 5.0.4
       p-queue: 6.6.2
@@ -2598,7 +2598,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@26.3.0':
+  '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
 
@@ -2618,7 +2618,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
@@ -2691,21 +2691,21 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.10(vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))':
+  '@vitest/mocker@4.1.10(vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))':
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)
+      vite: 8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
 
-  '@vitest/mocker@4.1.10(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))':
+  '@vitest/mocker@4.1.10(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))':
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
 
   '@vitest/pretty-format@4.1.10':
     dependencies:
@@ -3450,7 +3450,7 @@ snapshots:
 
   nanoid@3.3.18: {}
 
-  next@16.3.4(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  next@16.3.4(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.3.4
       '@swc/helpers': 0.5.23
@@ -3470,7 +3470,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 16.3.4
       '@next/swc-win32-x64-msvc': 16.3.4
       '@opentelemetry/api': 1.9.1
-      sharp: 0.35.3(@types/node@26.3.0)
+      sharp: 0.35.3(@types/node@26.4.1)
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/node'
@@ -3631,7 +3631,7 @@ snapshots:
   semver@7.8.5:
     optional: true
 
-  sharp@0.35.3(@types/node@26.3.0):
+  sharp@0.35.3(@types/node@26.4.1):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -3662,7 +3662,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.3
       '@img/sharp-win32-ia32': 0.35.3
       '@img/sharp-win32-x64': 0.35.3
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
     optional: true
 
   side-channel-list@1.0.1:
@@ -3797,7 +3797,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13):
+  vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.5
@@ -3805,12 +3805,12 @@ snapshots:
       rolldown: 1.2.4
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       esbuild: 0.28.2
       fsevents: 2.3.3
       tsx: 4.23.13
 
-  vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13):
+  vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -3818,15 +3818,15 @@ snapshots:
       rolldown: 1.2.7
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
       esbuild: 0.28.2
       fsevents: 2.3.3
       tsx: 4.23.13
 
-  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)):
+  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)):
     dependencies:
       '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(vite@8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))
+      '@vitest/mocker': 4.1.10(vite@8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
       '@vitest/pretty-format': 4.1.10
       '@vitest/runner': 4.1.10
       '@vitest/snapshot': 4.1.10
@@ -3843,18 +3843,18 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.2.1(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)
+      vite: 8.2.1(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.3.0)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)):
+  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)):
     dependencies:
       '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13))
+      '@vitest/mocker': 4.1.10(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
       '@vitest/pretty-format': 4.1.10
       '@vitest/runner': 4.1.10
       '@vitest/snapshot': 4.1.10
@@ -3871,11 +3871,11 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(tsx@4.23.13)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
-      '@types/node': 26.3.0
+      '@types/node': 26.4.1
     transitivePeerDependencies:
       - msw
 
