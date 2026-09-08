@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.4...v0.3.5) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deps:** bump qs to 6.16.0 to clear two moderate advisories ([#102](https://github.com/Elnora-AI/elnora-slack/issues/102)) ([da81a9e](https://github.com/Elnora-AI/elnora-slack/commit/da81a9e043ca2fd6c75c2cdc1437085c9ab34c1d))
+
 ## [0.3.4](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.3...v0.3.4) (2026-09-07)
 
 
