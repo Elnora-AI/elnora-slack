@@ -492,7 +492,12 @@ if (blogWorkflowConfig()) {
 		} catch (err) {
 			console.error("Slash command echo failed:", err instanceof Error ? err.name : "unknown");
 		}
-		const { message } = await dispatchBlogIdea(text);
+		// Hand the run this conversation, so the pull request is announced where
+		// the command was typed rather than nowhere.
+		const { message } = await dispatchBlogIdea(text, process.env, {
+			channel: resolveChannelId(event.channel, undefined),
+			user: event.user.userId,
+		});
 		await event.channel.post(message);
 	});
 }

@@ -15,6 +15,15 @@
  * ENABLES WHEN CONFIGURED, like every other optional integration here. Without
  * BLOG_WORKFLOW_REPO and BLOG_WORKFLOW_FILE the command tells the caller it is
  * not set up, and nothing else in the bot changes.
+ *
+ * THE RUN ANSWERS IN THE SAME CONVERSATION, when the workflow is built to.
+ * Dispatching is all this bot can do: the writing happens in CI for many
+ * minutes afterwards, so without something at the far end the person who asked
+ * gets an acknowledgement and then silence, and never learns whether a pull
+ * request appeared. BLOG_WORKFLOW_REPORTS_BACK says the workflow accepts
+ * `slack_channel` and `slack_user` inputs and posts the outcome back, and only
+ * then are they sent - an input a workflow does not declare is a 422, so a
+ * deployment whose workflow predates this keeps working untouched.
  */
 
 const API = "https://api.github.com";
@@ -36,6 +45,11 @@ export interface BlogWorkflowConfig {
 	workflow: string;
 	/** Branch the workflow is dispatched on. */
 	ref: string;
+	/**
+	 * Whether the workflow takes `slack_channel` / `slack_user` inputs and
+	 * reports the outcome back there when it finishes.
+	 */
+	reportsBack: boolean;
 }
 
 /**
@@ -48,7 +62,13 @@ export function blogWorkflowConfig(env: EnvLike = process.env): BlogWorkflowConf
 	const workflow = env.BLOG_WORKFLOW_FILE?.trim();
 	if (!token || !repo || !workflow) return null;
 	if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) return null;
-	return { token, repo, workflow, ref: env.BLOG_WORKFLOW_REF?.trim() || "main" };
+	return {
+		token,
+		repo,
+		workflow,
+		ref: env.BLOG_WORKFLOW_REF?.trim() || "main",
+		reportsBack: /^(1|true|yes)$/i.test(env.BLOG_WORKFLOW_REPORTS_BACK?.trim() ?? ""),
+	};
 }
 
 /**
@@ -71,7 +91,19 @@ function clip(s: string, n: number): string {
 	return `${one.slice(0, n).replace(/\s+\S*$/, "")}…`;
 }
 
-export async function dispatchBlogIdea(text: string, env: EnvLike = process.env): Promise<DispatchResult> {
+/** Where the command was typed, so the finished run can answer there. */
+export interface Origin {
+	/** Bare Slack channel or DM id (C…/D…/G…). */
+	channel?: string | null;
+	/** Slack user id of whoever ran the command. */
+	user?: string | null;
+}
+
+export async function dispatchBlogIdea(
+	text: string,
+	env: EnvLike = process.env,
+	origin: Origin = {},
+): Promise<DispatchResult> {
 	const config = blogWorkflowConfig(env);
 	if (!config) {
 		return {
@@ -88,6 +120,13 @@ export async function dispatchBlogIdea(text: string, env: EnvLike = process.env)
 
 	const { heading } = splitIdea(idea);
 
+	const inputs: Record<string, string> = { idea };
+	const answersHere = config.reportsBack && !!origin.channel;
+	if (answersHere) {
+		inputs.slack_channel = origin.channel as string;
+		if (origin.user) inputs.slack_user = origin.user;
+	}
+
 	let res: Response;
 	try {
 		res = await fetch(`${API}/repos/${config.repo}/actions/workflows/${config.workflow}/dispatches`, {
@@ -99,7 +138,7 @@ export async function dispatchBlogIdea(text: string, env: EnvLike = process.env)
 				Authorization: `Bearer ${config.token}`,
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ ref: config.ref, inputs: { idea } }),
+			body: JSON.stringify({ ref: config.ref, inputs }),
 		});
 	} catch (err) {
 		// Never surface the raw error: it can carry the URL, and the URL carries
@@ -109,7 +148,15 @@ export async function dispatchBlogIdea(text: string, env: EnvLike = process.env)
 	}
 
 	if (res.status === 204) {
-		return { ok: true, message: `Drafting *${clip(heading, 120)}*. A pull request appears when it is written.` };
+		// Say yes first, then say what happens next. The writing takes minutes,
+		// so the acknowledgement has to carry both that the request landed and
+		// where the answer will arrive.
+		return {
+			ok: true,
+			message: answersHere
+				? `On it, drafting *${clip(heading, 120)}* now. I will post the pull request here when it is written.`
+				: `On it, drafting *${clip(heading, 120)}* now. A pull request appears when it is written.`,
+		};
 	}
 	if (res.status === 404) {
 		return {
