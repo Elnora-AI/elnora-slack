@@ -22,6 +22,12 @@ describe("blogWorkflowConfig", () => {
 		expect(blogWorkflowConfig(CONFIGURED)?.ref).toBe("main");
 	});
 
+	it("does not report back unless the workflow is declared to accept it", () => {
+		expect(blogWorkflowConfig(CONFIGURED)?.reportsBack).toBe(false);
+		expect(blogWorkflowConfig({ ...CONFIGURED, BLOG_WORKFLOW_REPORTS_BACK: "true" })?.reportsBack).toBe(true);
+		expect(blogWorkflowConfig({ ...CONFIGURED, BLOG_WORKFLOW_REPORTS_BACK: "no" })?.reportsBack).toBe(false);
+	});
+
 	it("rejects a repo that is not owner/name", () => {
 		expect(blogWorkflowConfig({ ...CONFIGURED, BLOG_WORKFLOW_REPO: "automation" })).toBeNull();
 		expect(blogWorkflowConfig({ ...CONFIGURED, BLOG_WORKFLOW_REPO: "a/b/c" })).toBeNull();
@@ -73,6 +79,43 @@ describe("dispatchBlogIdea", () => {
 			inputs: { idea: "Scientists trust Excel\nBecause they can see it." },
 		});
 		expect(r.message).toContain("Scientists trust Excel");
+	});
+
+	it("keeps the conversation out of the inputs when the workflow cannot take it", async () => {
+		// An undeclared workflow_dispatch input is a 422, so a deployment whose
+		// workflow predates the report-back contract must dispatch exactly as before.
+		const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const r = await dispatchBlogIdea("an idea", CONFIGURED, { channel: "D123", user: "U9" });
+
+		expect(JSON.parse(fetchMock.mock.calls[0][1].body).inputs).toEqual({ idea: "an idea" });
+		expect(r.message).toContain("A pull request appears");
+	});
+
+	it("hands the run the conversation, and promises the answer there, once the workflow accepts it", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+		vi.stubGlobal("fetch", fetchMock);
+		const env = { ...CONFIGURED, BLOG_WORKFLOW_REPORTS_BACK: "true" };
+
+		const r = await dispatchBlogIdea("an idea", env, { channel: "D123", user: "U9" });
+
+		expect(JSON.parse(fetchMock.mock.calls[0][1].body).inputs).toEqual({
+			idea: "an idea",
+			slack_channel: "D123",
+			slack_user: "U9",
+		});
+		expect(r.message).toContain("post the pull request here");
+	});
+
+	it("falls back to the generic promise when there is no channel to answer in", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const r = await dispatchBlogIdea("an idea", { ...CONFIGURED, BLOG_WORKFLOW_REPORTS_BACK: "true" });
+
+		expect(JSON.parse(fetchMock.mock.calls[0][1].body).inputs).toEqual({ idea: "an idea" });
+		expect(r.message).toContain("A pull request appears");
 	});
 
 	it("explains a 404 as the workflow not being on the branch yet", async () => {
