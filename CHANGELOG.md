@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.5...v0.3.6) (2026-09-08)
+
+
+### Features
+
+* **bot:** let the /new-blog run answer in the conversation it came from ([#110](https://github.com/Elnora-AI/elnora-slack/issues/110)) ([6418cf4](https://github.com/Elnora-AI/elnora-slack/commit/6418cf4ebfcea173d9b608d70f88ca328bc4118b))
+
 ## [0.3.5](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.4...v0.3.5) (2026-09-08)
 
 
