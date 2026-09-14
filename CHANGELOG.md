@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.7](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.6...v0.3.7) (2026-09-14)
+
+
+### Bug Fixes
+
+* **deps:** raise the sharp override floor to 0.35.4 ([7e7205f](https://github.com/Elnora-AI/elnora-slack/commit/7e7205f2ea9fa12f981508615ccc949ae23ce6cf))
+* **deps:** raise the sharp override floor to 0.35.4 ([5cf81e2](https://github.com/Elnora-AI/elnora-slack/commit/5cf81e20f98dbded90e0d3b573c99ed52f73c537))
+
 ## [0.3.6](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.5...v0.3.6) (2026-09-08)
 
 
