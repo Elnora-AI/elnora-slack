@@ -37,7 +37,7 @@ importers:
         version: 8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
       vitest:
         specifier: ^5.0.0
-        version: 5.0.0(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 5.0.1(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
 
   bot:
     dependencies:
@@ -49,16 +49,16 @@ importers:
         version: 4.0.64(zod@4.4.3)
       '@ai-sdk/openai':
         specifier: ^4.0.23
-        version: 4.0.23(zod@4.4.3)
+        version: 4.0.70(zod@4.4.3)
       '@chat-adapter/slack':
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-memory':
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-redis':
-        specifier: 4.39.0
-        version: 4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@linear/sdk':
         specifier: ^92.0.0
         version: 92.0.0(graphql@17.0.2)
@@ -69,8 +69,8 @@ importers:
         specifier: ^7.0.98
         version: 7.0.106(zod@4.4.3)
       chat:
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       googleapis:
         specifier: ^173.0.0
         version: 173.0.0
@@ -107,7 +107,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^5.0.0
-        version: 5.0.0(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
+        version: 5.0.1(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
 
 packages:
 
@@ -129,14 +129,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@4.0.23':
-    resolution: {integrity: sha512-J7ad/TxUVpPl+oXHZzvpg9Y7NsrimF26LpF91PLgLbpkfMijv3ze9V4CRP3XYWhHwo6Qda/yy4bHmRDhIa8WrQ==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider-utils@5.0.14':
-    resolution: {integrity: sha512-HW+Ys98cr2BRQzP6jTlp2bRKIqt+oAjYNLm9gqUUQkLz7QERtaPgDZOoXHz9IXSXoOtz175p4Q17qKQdEX0Hag==}
+  '@ai-sdk/openai@4.0.70':
+    resolution: {integrity: sha512-D2JjGOPnn67HYqMn/22/xtel0Gdz/0jSwe6Ig7HMa0piGmAekBfg71vAmFwx3GN9PZPKB+JUIpuzTASRLUBVKw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -159,10 +153,6 @@ packages:
 
   '@ai-sdk/provider@4.0.17':
     resolution: {integrity: sha512-VYMBxIQdcHqbIf1j+YZlI9Ati6LZ4wJe0GGd4z4a5H/KxTggjeOiyaVYTnfF7LHZK5jMQ+rofmzz4QPqf++NUw==}
-    engines: {node: '>=22'}
-
-  '@ai-sdk/provider@4.0.4':
-    resolution: {integrity: sha512-tbHKNLirllUNF3ZlkCsXnwab2ZV1Sl4b1H/Cp9ruCce15IBmskE8Gwkk0yo9xDWY+jho2of7lVXtwSsyrq7cwQ==}
     engines: {node: '>=22'}
 
   '@biomejs/biome@2.5.12':
@@ -222,20 +212,20 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@chat-adapter/shared@4.39.0':
-    resolution: {integrity: sha512-zc5mB5rYqbp4ts+Z3tG/YwkCypPYphriYpG95ZMRNGiEYx3cYZJZFmAFFM4YLfdz3VIQ99Fd0HFDYVNyAMV7cg==}
+  '@chat-adapter/shared@4.41.0':
+    resolution: {integrity: sha512-h/MiKMoQf5nl5Zgua8EMxVSdyylFg8pA+nKnwYNexPHzr59I1PT9u7z3EVSOrjbMjre3MmlrUM0TPbIWaRrSZg==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/slack@4.39.0':
-    resolution: {integrity: sha512-nDBYFEmD9MUobUH+HJbOYwKYcaeoCFJDXVvd41flh5sslpixSUG2SFcz7F3py62jJ9c0YYNEdwprIExO20IyZQ==}
+  '@chat-adapter/slack@4.41.0':
+    resolution: {integrity: sha512-6y+P1vpI8edvBHhO/SlF5sMgWlDxJiDTsTcAiJO5yOyADoVl97wlTaOiXfc5Y+b2+fhEcERvhNpjGyvT7hRdVA==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-memory@4.39.0':
-    resolution: {integrity: sha512-sTslMdRA9MG2MYUF9anD+eatZ1o3Nu64TkQCJ9GrGWfRCefM8DnIG/Op+Ej9XS6XjqOORb3eDJvy6IpvWrfT4A==}
+  '@chat-adapter/state-memory@4.41.0':
+    resolution: {integrity: sha512-Px+csQMhc0/Z1SauPdzV8ar9GJ4EoCThFi2a+e3HcrcYTdwLSNhT/h4MJrfaA3/8PCOO4Y4EvanwGVYzcLbhhA==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-redis@4.39.0':
-    resolution: {integrity: sha512-fBubw8N2AYQM+QcShx1H+ofWGHJNgvWECVFnAd7U51OoJm5mPf79RM8ywm/nV1ZtIPHLHUivQBg1mt0x/7YwPQ==}
+  '@chat-adapter/state-redis@4.41.0':
+    resolution: {integrity: sha512-skezIMJ0XWeBsBoUhebhBmc6nsza6kCjxADgD653fxg9IrxzIgJVoYCaSrCS4ixGG+FuC6V7Tu5Nkdzu9qWr2g==}
     engines: {node: '>=20'}
 
   '@emnapi/runtime@1.11.3':
@@ -974,8 +964,8 @@ packages:
     resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
     engines: {node: '>= 20'}
 
-  '@vitest/mocker@5.0.0':
-    resolution: {integrity: sha512-66PGTMIiVJP3t4a5yxU9qPtf7MdTBs8jmToMvy+HVflB3Yy13WJZTtPePdvU+wjRV02SKK5doLbSA6o9pwOmiA==}
+  '@vitest/mocker@5.0.1':
+    resolution: {integrity: sha512-6K1DoBNAPGvuOcSsGA4D6x+5zEEff/KmOOP3uetT2TrGpVfI+HRHRnJJfKi5ib/g1vx8IYHQD8s0pbJz8WQI7Q==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -985,8 +975,8 @@ packages:
       vite:
         optional: true
 
-  '@vitest/spy@5.0.0':
-    resolution: {integrity: sha512-uy+luWBAPw9XfthoHi5AkfHUnuPYEESjl0p/r+meoBnU8bxg5GDQ3Ey8MjcJ6sqahkL4PFyrvfMJJBw7LbU06g==}
+  '@vitest/spy@5.0.1':
+    resolution: {integrity: sha512-rbto/mF/SGERxEgYOek7Xm6B9b+y+mVoo+f4b2LymYO8zM1b7uB5nHuhVMTP2hxdzgxvGiZYGxGIaMvL5y180Q==}
 
   '@workflow/serde@4.1.0':
     resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
@@ -1056,8 +1046,8 @@ packages:
   character-entities@2.0.2:
     resolution: {integrity: sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ==}
 
-  chat@4.39.0:
-    resolution: {integrity: sha512-o7D+oAbQAYFVoc9+OH8wya11609ybRThNTF3s/5C1LAABGGi6IrxoQQEN/aIe+4h5pmKYzUjXeqTcuOZcpIAZA==}
+  chat@4.41.0:
+    resolution: {integrity: sha512-vMeODhulMdi7od1c6e4B/ZfIp/zq0f5KP3WKNCAAdNrTOeDgjRNZQZahaIax/t/gu+LE5vwJSjFU46Ro9Kx9tA==}
     engines: {node: '>=20'}
     peerDependencies:
       ai: ^6.0.182 || ^7.0.0
@@ -1163,10 +1153,6 @@ packages:
 
   eventemitter3@5.0.4:
     resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
-
-  eventsource-parser@3.1.0:
-    resolution: {integrity: sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==}
-    engines: {node: '>=18.0.0'}
 
   eventsource-parser@3.1.1:
     resolution: {integrity: sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ==}
@@ -1393,8 +1379,8 @@ packages:
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
 
-  magic-string@1.2.3:
-    resolution: {integrity: sha512-Bpb0W2TbLKOZ7vJnOUnVRGq3WL2p+ISV29M6hYPL1AFCpyKZpdr5ytiXoTSSxRVhg8YW7f65+6gbG8WG6PCa/g==}
+  magic-string@1.4.1:
+    resolution: {integrity: sha512-8lyCu36ErXR0J9uaGKlKQoiLZKmtI63YGLE8G2o9jyRPdr4X47LusSOwgOJOzcVtp81fTAAjxR7BwKz682Jhow==}
 
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
@@ -1448,8 +1434,8 @@ packages:
   micromark-extension-gfm-strikethrough@2.1.0:
     resolution: {integrity: sha512-ADVjpOOkjz1hhkZLlBiYA9cR2Anf8F4HqZUO6e5eDcPQd0Txw5fxLzzxnEkSkfnD0wziSGiv7sYhk/ktvbf1uw==}
 
-  micromark-extension-gfm-table@2.1.1:
-    resolution: {integrity: sha512-t2OU/dXXioARrC6yWfJ4hqB7rct14e8f7m0cbI5hUmDyyIlwv5vEtooptH8INkbLzOatzKuVbQmAYcbWoyz6Dg==}
+  micromark-extension-gfm-table@2.1.2:
+    resolution: {integrity: sha512-pRzm4kDTu0MjlmBkxmS9yYhw60nncfcEwu9NNdPFSQEFXS95ZKyIIyTSHu/o3ReBUrLKYEq+7YaXCRn/bPB4MA==}
 
   micromark-extension-gfm-tagfilter@2.0.0:
     resolution: {integrity: sha512-xHlTOmuCSotIA8TW1mDIM6X2O1SiX5P9IuDtqGonFhEK0qgRI4yeC6vMxEV2dgyr2TiD+2PQ10o+cOhdVAcwfg==}
@@ -1570,8 +1556,8 @@ packages:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
 
-  obug@2.1.4:
-    resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
+  obug@2.2.1:
+    resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
     engines: {node: '>=12.20.0'}
 
   p-finally@1.0.0:
@@ -1816,20 +1802,20 @@ packages:
       yaml:
         optional: true
 
-  vitest@5.0.0:
-    resolution: {integrity: sha512-gpsMNoRhMjMktVxPtstOH4/PJuPyovVaMDr4oDilXaGH1EcqM2OE96SoHT2VIQ6fTGtTjqmHDrEu2X9RQiXf8Q==}
+  vitest@5.0.1:
+    resolution: {integrity: sha512-iA95lQbKEkvrtTkdAgnWbXfbipWiiWe/hDl2P5tMi6WFwD76G0NxXAGp/M9EOcYupeGJRr6wppMc7CoA41TQjg==}
     engines: {node: ^22.12.0 || ^24.0.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@opentelemetry/api': ^1.9.0
       '@types/node': ^22.0.0 || >=24.0.0
-      '@vitest/browser-playwright': 5.0.0
-      '@vitest/browser-preview': 5.0.0
+      '@vitest/browser-playwright': 5.0.1
+      '@vitest/browser-preview': 5.0.1
       '@vitest/browser-webdriverio': ^5.0.0-beta.5 || >=5.0.0
-      '@vitest/coverage-istanbul': 5.0.0
-      '@vitest/coverage-v8': 5.0.0
-      '@vitest/ui': 5.0.0
+      '@vitest/coverage-istanbul': 5.0.1
+      '@vitest/coverage-v8': 5.0.1
+      '@vitest/ui': 5.0.1
       happy-dom: '*'
       jsdom: '*'
       vite: ^6.4.0 || ^7.0.0 || ^8.0.0
@@ -1905,18 +1891,10 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.36(zod@4.4.3)
       zod: 4.4.3
 
-  '@ai-sdk/openai@4.0.23(zod@4.4.3)':
+  '@ai-sdk/openai@4.0.70(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 4.0.4
-      '@ai-sdk/provider-utils': 5.0.14(zod@4.4.3)
-      zod: 4.4.3
-
-  '@ai-sdk/provider-utils@5.0.14(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.4
-      '@standard-schema/spec': 1.1.0
-      '@workflow/serde': 4.1.0
-      eventsource-parser: 3.1.0
+      '@ai-sdk/provider': 4.0.17
+      '@ai-sdk/provider-utils': 5.0.44(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/provider-utils@5.0.36(zod@4.4.3)':
@@ -1942,10 +1920,6 @@ snapshots:
       json-schema: 0.4.0
 
   '@ai-sdk/provider@4.0.17':
-    dependencies:
-      json-schema: 0.4.0
-
-  '@ai-sdk/provider@4.0.4':
     dependencies:
       json-schema: 0.4.0
 
@@ -1984,21 +1958,21 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.12':
     optional: true
 
-  '@chat-adapter/shared@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/shared@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/slack@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/slack@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      '@chat-adapter/shared': 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      '@chat-adapter/shared': 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@slack/socket-mode': 2.0.7
       '@slack/web-api': 7.19.0
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - bufferutil
@@ -2008,18 +1982,18 @@ snapshots:
       - workflow
       - zod
 
-  '@chat-adapter/state-memory@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-memory@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/state-redis@4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-redis@4.41.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       redis: 5.12.1(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@node-rs/xxhash'
@@ -2502,16 +2476,16 @@ snapshots:
 
   '@vercel/oidc@3.2.0': {}
 
-  '@vitest/mocker@5.0.0(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))':
+  '@vitest/mocker@5.0.1(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@vitest/spy': 5.0.0
+      '@vitest/spy': 5.0.1
       estree-walker: 3.0.3
-      magic-string: 1.2.3
+      magic-string: 1.4.1
     optionalDependencies:
       vite: 8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)
 
-  '@vitest/spy@5.0.0': {}
+  '@vitest/spy@5.0.1': {}
 
   '@workflow/serde@4.1.0': {}
 
@@ -2574,7 +2548,7 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chat@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3):
+  chat@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0
@@ -2686,8 +2660,6 @@ snapshots:
   eventemitter3@4.0.7: {}
 
   eventemitter3@5.0.4: {}
-
-  eventsource-parser@3.1.0: {}
 
   eventsource-parser@3.1.1: {}
 
@@ -2919,7 +2891,7 @@ snapshots:
 
   longest-streak@3.1.0: {}
 
-  magic-string@1.2.3:
+  magic-string@1.4.1:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
@@ -3075,7 +3047,7 @@ snapshots:
       micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
 
-  micromark-extension-gfm-table@2.1.1:
+  micromark-extension-gfm-table@2.1.2:
     dependencies:
       devlop: 1.1.0
       micromark-factory-space: 2.0.1
@@ -3100,7 +3072,7 @@ snapshots:
       micromark-extension-gfm-autolink-literal: 2.1.0
       micromark-extension-gfm-footnote: 2.1.0
       micromark-extension-gfm-strikethrough: 2.1.0
-      micromark-extension-gfm-table: 2.1.1
+      micromark-extension-gfm-table: 2.1.2
       micromark-extension-gfm-tagfilter: 2.0.0
       micromark-extension-gfm-task-list-item: 2.1.0
       micromark-util-combine-extensions: 2.0.1
@@ -3266,7 +3238,7 @@ snapshots:
 
   object-inspect@1.13.4: {}
 
-  obug@2.1.4: {}
+  obug@2.2.1: {}
 
   p-finally@1.0.0: {}
 
@@ -3558,15 +3530,15 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.23.13
 
-  vitest@5.0.0(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)):
+  vitest@5.0.1(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
+      '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.4.1)(esbuild@0.28.2)(tsx@4.23.13))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
-      magic-string: 1.2.3
-      obug: 2.1.4
+      magic-string: 1.4.1
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4
