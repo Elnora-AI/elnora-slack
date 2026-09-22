@@ -51,14 +51,14 @@ importers:
         specifier: ^4.0.23
         version: 4.0.70(zod@4.4.3)
       '@chat-adapter/slack':
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-memory':
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@chat-adapter/state-redis':
-        specifier: 4.39.0
-        version: 4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@linear/sdk':
         specifier: ^92.0.0
         version: 92.0.0(graphql@17.0.2)
@@ -69,8 +69,8 @@ importers:
         specifier: ^7.0.98
         version: 7.0.106(zod@4.4.3)
       chat:
-        specifier: 4.39.0
-        version: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+        specifier: 4.41.0
+        version: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       googleapis:
         specifier: ^173.0.0
         version: 173.0.0
@@ -212,20 +212,20 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@chat-adapter/shared@4.39.0':
-    resolution: {integrity: sha512-zc5mB5rYqbp4ts+Z3tG/YwkCypPYphriYpG95ZMRNGiEYx3cYZJZFmAFFM4YLfdz3VIQ99Fd0HFDYVNyAMV7cg==}
+  '@chat-adapter/shared@4.41.0':
+    resolution: {integrity: sha512-h/MiKMoQf5nl5Zgua8EMxVSdyylFg8pA+nKnwYNexPHzr59I1PT9u7z3EVSOrjbMjre3MmlrUM0TPbIWaRrSZg==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/slack@4.39.0':
-    resolution: {integrity: sha512-nDBYFEmD9MUobUH+HJbOYwKYcaeoCFJDXVvd41flh5sslpixSUG2SFcz7F3py62jJ9c0YYNEdwprIExO20IyZQ==}
+  '@chat-adapter/slack@4.41.0':
+    resolution: {integrity: sha512-6y+P1vpI8edvBHhO/SlF5sMgWlDxJiDTsTcAiJO5yOyADoVl97wlTaOiXfc5Y+b2+fhEcERvhNpjGyvT7hRdVA==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-memory@4.39.0':
-    resolution: {integrity: sha512-sTslMdRA9MG2MYUF9anD+eatZ1o3Nu64TkQCJ9GrGWfRCefM8DnIG/Op+Ej9XS6XjqOORb3eDJvy6IpvWrfT4A==}
+  '@chat-adapter/state-memory@4.41.0':
+    resolution: {integrity: sha512-Px+csQMhc0/Z1SauPdzV8ar9GJ4EoCThFi2a+e3HcrcYTdwLSNhT/h4MJrfaA3/8PCOO4Y4EvanwGVYzcLbhhA==}
     engines: {node: '>=20'}
 
-  '@chat-adapter/state-redis@4.39.0':
-    resolution: {integrity: sha512-fBubw8N2AYQM+QcShx1H+ofWGHJNgvWECVFnAd7U51OoJm5mPf79RM8ywm/nV1ZtIPHLHUivQBg1mt0x/7YwPQ==}
+  '@chat-adapter/state-redis@4.41.0':
+    resolution: {integrity: sha512-skezIMJ0XWeBsBoUhebhBmc6nsza6kCjxADgD653fxg9IrxzIgJVoYCaSrCS4ixGG+FuC6V7Tu5Nkdzu9qWr2g==}
     engines: {node: '>=20'}
 
   '@emnapi/runtime@1.11.3':
@@ -1046,8 +1046,8 @@ packages:
   character-entities@2.0.2:
     resolution: {integrity: sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ==}
 
-  chat@4.39.0:
-    resolution: {integrity: sha512-o7D+oAbQAYFVoc9+OH8wya11609ybRThNTF3s/5C1LAABGGi6IrxoQQEN/aIe+4h5pmKYzUjXeqTcuOZcpIAZA==}
+  chat@4.41.0:
+    resolution: {integrity: sha512-vMeODhulMdi7od1c6e4B/ZfIp/zq0f5KP3WKNCAAdNrTOeDgjRNZQZahaIax/t/gu+LE5vwJSjFU46Ro9Kx9tA==}
     engines: {node: '>=20'}
     peerDependencies:
       ai: ^6.0.182 || ^7.0.0
@@ -1434,8 +1434,8 @@ packages:
   micromark-extension-gfm-strikethrough@2.1.0:
     resolution: {integrity: sha512-ADVjpOOkjz1hhkZLlBiYA9cR2Anf8F4HqZUO6e5eDcPQd0Txw5fxLzzxnEkSkfnD0wziSGiv7sYhk/ktvbf1uw==}
 
-  micromark-extension-gfm-table@2.1.1:
-    resolution: {integrity: sha512-t2OU/dXXioARrC6yWfJ4hqB7rct14e8f7m0cbI5hUmDyyIlwv5vEtooptH8INkbLzOatzKuVbQmAYcbWoyz6Dg==}
+  micromark-extension-gfm-table@2.1.2:
+    resolution: {integrity: sha512-pRzm4kDTu0MjlmBkxmS9yYhw60nncfcEwu9NNdPFSQEFXS95ZKyIIyTSHu/o3ReBUrLKYEq+7YaXCRn/bPB4MA==}
 
   micromark-extension-gfm-tagfilter@2.0.0:
     resolution: {integrity: sha512-xHlTOmuCSotIA8TW1mDIM6X2O1SiX5P9IuDtqGonFhEK0qgRI4yeC6vMxEV2dgyr2TiD+2PQ10o+cOhdVAcwfg==}
@@ -1958,21 +1958,21 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.12':
     optional: true
 
-  '@chat-adapter/shared@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/shared@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/slack@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/slack@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      '@chat-adapter/shared': 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      '@chat-adapter/shared': 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       '@slack/socket-mode': 2.0.7
       '@slack/web-api': 7.19.0
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - bufferutil
@@ -1982,18 +1982,18 @@ snapshots:
       - workflow
       - zod
 
-  '@chat-adapter/state-memory@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-memory@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - workflow
       - zod
 
-  '@chat-adapter/state-redis@4.39.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-redis@4.41.0(@opentelemetry/api@1.9.1)(ai@7.0.106(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
+      chat: 4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3)
       redis: 5.12.1(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@node-rs/xxhash'
@@ -2548,7 +2548,7 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chat@4.39.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3):
+  chat@4.41.0(ai@7.0.106(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0
@@ -3047,7 +3047,7 @@ snapshots:
       micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
 
-  micromark-extension-gfm-table@2.1.1:
+  micromark-extension-gfm-table@2.1.2:
     dependencies:
       devlop: 1.1.0
       micromark-factory-space: 2.0.1
@@ -3072,7 +3072,7 @@ snapshots:
       micromark-extension-gfm-autolink-literal: 2.1.0
       micromark-extension-gfm-footnote: 2.1.0
       micromark-extension-gfm-strikethrough: 2.1.0
-      micromark-extension-gfm-table: 2.1.1
+      micromark-extension-gfm-table: 2.1.2
       micromark-extension-gfm-tagfilter: 2.0.0
       micromark-extension-gfm-task-list-item: 2.1.0
       micromark-util-combine-extensions: 2.0.1
