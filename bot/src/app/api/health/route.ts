@@ -65,6 +65,14 @@ async function pingRedis(): Promise<CheckResult> {
 	}
 }
 
+const PROVIDER_KEY: Record<string, string> = {
+	anthropic: "ANTHROPIC_API_KEY",
+	openrouter: "OPENROUTER_API_KEY",
+	openai: "OPENAI_API_KEY",
+	google: "GOOGLE_GENERATIVE_AI_API_KEY",
+	gemini: "GOOGLE_GENERATIVE_AI_API_KEY",
+};
+
 function envPresent(name: string, detail?: string): CheckResult {
 	return process.env[name] ? { ok: true } : { ok: false, detail: detail ?? `${name} not set` };
 }
@@ -74,7 +82,10 @@ export async function GET() {
 
 	const checks: Record<string, CheckResult> = {
 		redis,
-		openrouter: envPresent("OPENROUTER_API_KEY"),
+		// The key the selected LLM_PROVIDER needs (agent.ts falls back to anthropic).
+		llm: envPresent(
+			PROVIDER_KEY[(process.env.LLM_PROVIDER?.trim() || "anthropic").toLowerCase()] ?? "ANTHROPIC_API_KEY",
+		),
 		slack_bot: envPresent("SLACK_BOT_TOKEN"),
 		slack_signing: envPresent("SLACK_SIGNING_SECRET"),
 	};
