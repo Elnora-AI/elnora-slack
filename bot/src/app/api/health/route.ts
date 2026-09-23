@@ -74,7 +74,7 @@ export async function GET() {
 
 	const checks: Record<string, CheckResult> = {
 		redis,
-		anthropic: envPresent("ANTHROPIC_API_KEY"),
+		openrouter: envPresent("OPENROUTER_API_KEY"),
 		slack_bot: envPresent("SLACK_BOT_TOKEN"),
 		slack_signing: envPresent("SLACK_SIGNING_SECRET"),
 	};
