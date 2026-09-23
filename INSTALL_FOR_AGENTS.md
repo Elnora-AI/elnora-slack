@@ -203,7 +203,7 @@ DM the bot or @-mention it in a channel and get an AI reply with tool access.
 
 The bot needs three things no plugin can provide: an always-on public HTTPS
 endpoint (Vercel), a Slack app with the Events API pointed at it, and an
-OpenRouter API key. Everything org-specific — tokens, names, the system prompt,
+Anthropic API key. Everything org-specific — tokens, names, the system prompt,
 which tools are on — lives in **environment variables on the user's own Vercel
 project**. Nothing is hardcoded; the same code serves any org.
 
@@ -229,10 +229,11 @@ the chat.
    ```
 
    `vercel login` opens a browser confirmation — wait for the user.
-4. An **LLM API key**. OpenRouter is the default — get one from
-   [https://openrouter.ai/keys](https://openrouter.ai/keys)
-   (`OPENROUTER_API_KEY`). To use OpenAI or Google instead, set
-   `LLM_PROVIDER=openai` (`OPENAI_API_KEY`) or `LLM_PROVIDER=google`
+4. An **LLM API key**. Anthropic is the default — get one from
+   [https://console.anthropic.com/](https://console.anthropic.com/)
+   (`ANTHROPIC_API_KEY`). To use OpenRouter, OpenAI or Google instead, set
+   `LLM_PROVIDER=openrouter` (`OPENROUTER_API_KEY`), `LLM_PROVIDER=openai`
+   (`OPENAI_API_KEY`) or `LLM_PROVIDER=google`
    (`GOOGLE_GENERATIVE_AI_API_KEY`) in B3; only the one key matching
    `LLM_PROVIDER` is needed. The user keeps it ready to paste in B3 (not into
    the chat).
@@ -269,14 +270,14 @@ Full reference: [`bot/.env.example`](bot/.env.example). Minimum to boot:
 
 | Variable | What | Where from |
 |---|---|---|
-| `OPENROUTER_API_KEY` | pays for the model | openrouter.ai/keys |
+| `ANTHROPIC_API_KEY` | pays for the model | console.anthropic.com |
 | `SLACK_BOT_TOKEN` | bot identity (`xoxb-…`) | created in B4 — set after |
 | `SLACK_SIGNING_SECRET` | verifies events are from Slack | created in B4 — set after |
 | `REDIS_URL` | persists thread subscriptions across cold starts | one-click via Vercel Storage (below) — strongly recommended |
 
 Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
 `SYSTEM_PROMPT_APPEND` for org-specific instructions. Model defaults to
-`openrouter/auto`, which picks a model per request (override with `BOT_MODEL`).
+`claude-sonnet-5` (override with `BOT_MODEL`).
 
 **Plan to connect the knowledge base in this same pass.** It's the bot's default
 connection — the whole point is that it answers from the user's own documents,
@@ -291,7 +292,7 @@ Have the **user** paste each value at the prompt (values never enter the
 chat):
 
 ```sh
-vercel env add OPENROUTER_API_KEY production
+vercel env add ANTHROPIC_API_KEY production
 vercel env add REDIS_URL production
 vercel env add BOT_NAME production
 ```
@@ -385,10 +386,9 @@ Then verify, with `<domain>` = the production domain:
 curl -s https://<domain>/api/health
 ```
 
-Expect `"status":"ok"` with `slack_bot`, `slack_signing`, `openrouter` all
-`"ok": true`. (The `openrouter` check only tests `OPENROUTER_API_KEY`; if you set
-`LLM_PROVIDER=openai|google` it will read not-set — that's fine, treat a live
-reply in Slack from B6 as the real success signal.) In the Slack app config →
+Expect `"status":"ok"` with `slack_bot`, `slack_signing`, `llm` all
+`"ok": true`. (The `llm` check tests the key that `LLM_PROVIDER` needs; still
+treat a live reply in Slack from B6 as the real success signal.) In the Slack app config →
 **Event Subscriptions**, the request
 URL must show **Verified** (re-verify now if it didn't in B4).
 
@@ -422,7 +422,7 @@ Have the user (in Slack):
 
 If nothing comes back, read the function logs (`vercel logs <domain>`) — the
 usual suspects are a wrong signing secret (events rejected silently), a
-missing `OPENROUTER_API_KEY`, or the Events URL pointing at a preview
+missing `ANTHROPIC_API_KEY`, or the Events URL pointing at a preview
 deployment instead of production. If only the reaction test fails, the app
 was created from an older manifest — add the `reaction_added` bot event
 under **Event Subscriptions** and reinstall the app.
@@ -551,6 +551,10 @@ PRing genuinely reusable ones back to
 
 These are the exact traps a real end-to-end setup hit — check them in order:
 
+- **`ANTHROPIC_API_KEY` won't set via `vercel env add`** (silently fails, absent
+  from `vercel env ls`) → on teams with Vercel AI Gateway enabled, that name is
+  reserved. Add it through the **Vercel dashboard** (Project → Settings →
+  Environment Variables → Add), not the CLI. Redeploy after.
 - **Request URL shows "Verified" then flips to "didn't respond"** → the
   verification was never **Saved**. On the Event Subscriptions page, after it
   shows Verified, the change must be committed (the manifest editor's Save can
