@@ -229,14 +229,24 @@ the chat.
    ```
 
    `vercel login` opens a browser confirmation — wait for the user.
-4. An **LLM API key**. Anthropic is the default — get one from
-   [https://console.anthropic.com/](https://console.anthropic.com/)
-   (`ANTHROPIC_API_KEY`). To use OpenRouter, OpenAI or Google instead, set
-   `LLM_PROVIDER=openrouter` (`OPENROUTER_API_KEY`), `LLM_PROVIDER=openai`
-   (`OPENAI_API_KEY`) or `LLM_PROVIDER=google`
-   (`GOOGLE_GENERATIVE_AI_API_KEY`) in B3; only the one key matching
-   `LLM_PROVIDER` is needed. The user keeps it ready to paste in B3 (not into
-   the chat).
+4. An **LLM API key** from whichever provider the user already pays for. Ask
+   which one; don't steer them to a provider. The bot picks the provider from
+   the env var the key is stored under:
+
+   | Provider | Env var |
+   |---|---|
+   | Anthropic | `ANTHROPIC_API_KEY` |
+   | OpenAI | `OPENAI_API_KEY` |
+   | Google Gemini | `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` |
+   | OpenRouter | `OPENROUTER_API_KEY` |
+   | Groq | `GROQ_API_KEY` |
+   | DeepSeek | `DEEPSEEK_API_KEY` |
+   | xAI | `XAI_API_KEY` |
+   | Mistral | `MISTRAL_API_KEY` |
+   | Anything OpenAI-compatible (Azure OpenAI, Together, Fireworks, LiteLLM, vLLM, …) | `LLM_BASE_URL` + `LLM_API_KEY` + `BOT_MODEL` |
+
+   One key is enough. If the user sets several, `LLM_PROVIDER` picks one.
+   The user keeps the key ready to paste in B3 (not into the chat).
 5. Optional but recommended: a browser automation tool (e.g. Chrome DevTools
    MCP) so you can drive the Slack/Vercel/Google dashboards and debug the
    deployment yourself.
@@ -270,14 +280,14 @@ Full reference: [`bot/.env.example`](bot/.env.example). Minimum to boot:
 
 | Variable | What | Where from |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | pays for the model | console.anthropic.com |
+| the LLM key from B1 (e.g. `OPENAI_API_KEY`) | pays for the model | the user's provider console |
 | `SLACK_BOT_TOKEN` | bot identity (`xoxb-…`) | created in B4 — set after |
 | `SLACK_SIGNING_SECRET` | verifies events are from Slack | created in B4 — set after |
 | `REDIS_URL` | persists thread subscriptions across cold starts | one-click via Vercel Storage (below) — strongly recommended |
 
 Strongly recommended identity/behavior: `BOT_NAME`, `ORG_NAME`, and
-`SYSTEM_PROMPT_APPEND` for org-specific instructions. Model defaults to
-`claude-sonnet-5` (override with `BOT_MODEL`).
+`SYSTEM_PROMPT_APPEND` for org-specific instructions. Each provider has a
+default model; override it with `BOT_MODEL`.
 
 **Plan to connect the knowledge base in this same pass.** It's the bot's default
 connection — the whole point is that it answers from the user's own documents,
@@ -292,7 +302,7 @@ Have the **user** paste each value at the prompt (values never enter the
 chat):
 
 ```sh
-vercel env add ANTHROPIC_API_KEY production
+vercel env add OPENAI_API_KEY production   # the user's key, under its provider's name from B1
 vercel env add REDIS_URL production
 vercel env add BOT_NAME production
 ```
@@ -387,7 +397,8 @@ curl -s https://<domain>/api/health
 ```
 
 Expect `"status":"ok"` with `slack_bot`, `slack_signing`, `llm` all
-`"ok": true`. (The `llm` check tests the key that `LLM_PROVIDER` needs; still
+`"ok": true`. (The `llm` check names the provider and model the bot picked
+and fails with the reason if it can't call one; still
 treat a live reply in Slack from B6 as the real success signal.) In the Slack app config →
 **Event Subscriptions**, the request
 URL must show **Verified** (re-verify now if it didn't in B4).
@@ -422,7 +433,7 @@ Have the user (in Slack):
 
 If nothing comes back, read the function logs (`vercel logs <domain>`) — the
 usual suspects are a wrong signing secret (events rejected silently), a
-missing `ANTHROPIC_API_KEY`, or the Events URL pointing at a preview
+missing LLM key (check `llm` in `/api/health`), or the Events URL pointing at a preview
 deployment instead of production. If only the reaction test fails, the app
 was created from an older manifest — add the `reaction_added` bot event
 under **Event Subscriptions** and reinstall the app.
