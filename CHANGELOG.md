@@ -1,11 +1,14 @@
 # Changelog
 
+## [0.4.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.4.0...v0.4.1) (2026-09-24)
+
+
+### Features
+
+* **bot:** the bot runs on whichever LLM key it finds, from any provider ([#131](https://github.com/Elnora-AI/elnora-slack/issues/131)) ([ff8ab3c](https://github.com/Elnora-AI/elnora-slack/commit/ff8ab3ceee4546c53f95612f9784882f1da74d0e))
+
 ## [0.4.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.7...v0.4.0) (2026-09-24)
 
-
-### ⚠ BREAKING CHANGES
-
-* **bot:** a deployment that set only ANTHROPIC_API_KEY needs OPENROUTER_API_KEY before it upgrades. The Anthropic provider is no longer available.
 
 ### Features
 

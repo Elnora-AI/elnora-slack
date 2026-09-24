@@ -20,7 +20,7 @@ Everything the bot needs, in one place. Full env reference: [`.env.example`](.en
 | **Vercel account** | Hosts the Next.js app (root directory `bot/`). The webhook runs with `maxDuration=300`, so the project must have **Fluid Compute enabled** (free; default on new projects) or be on **Vercel Pro** — otherwise long agent replies hit the Hobby timeout and cut off. |
 | **Vercel CLI** | `npm i -g vercel` (used to deploy and set env vars). |
 | **Node.js ≥ 20.9.0** | For the CLI, local build, and tests (`engines` in `package.json`). |
-| **An LLM API key** | Anthropic by default → `ANTHROPIC_API_KEY`. To use another provider set `LLM_PROVIDER=openrouter` (`OPENROUTER_API_KEY`, model `openrouter/auto` by default), `LLM_PROVIDER=openai` (`OPENAI_API_KEY`) or `LLM_PROVIDER=google` (`GOOGLE_GENERATIVE_AI_API_KEY`). Exactly one provider key is required; override the model with `BOT_MODEL`. |
+| **An LLM API key** | Any one of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_GENERATIVE_AI_API_KEY`), `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY` or `MISTRAL_API_KEY`. The bot picks the provider from the key it finds, so nothing else needs setting. Any other OpenAI-compatible endpoint (Azure OpenAI, Together, Fireworks, LiteLLM, a self-hosted vLLM or Ollama) works with `LLM_BASE_URL` + `LLM_API_KEY` + `BOT_MODEL`. With several keys set, `LLM_PROVIDER` chooses; `BOT_MODEL` overrides the model. `/api/health` shows the provider and model in use. |
 | **A Slack app** | Created from [`app-manifest.json`](app-manifest.json) → gives `SLACK_BOT_TOKEN` (`xoxb-`) + `SLACK_SIGNING_SECRET`. The manifest's `channels:history` / `groups:history` / `im:history` / `mpim:history` scopes are what make live thread/DM memory work — don't remove them. It also registers the events and the `/ask`, `/note`, `/find`, `/botstatus`, `/new-blog` slash commands. |
 
 **Strongly recommended**
@@ -59,7 +59,7 @@ npm install -g vercel && vercel login
 git clone https://github.com/Elnora-AI/elnora-slack.git
 cd elnora-slack/bot
 vercel --yes                      # create the project
-# set envs (see .env.example): ANTHROPIC_API_KEY, REDIS_URL, BOT_NAME, …
+# set envs (see .env.example): your LLM key (any provider), REDIS_URL, BOT_NAME, …
 # connect your knowledge base (the default tool — see below):
 #   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, DRIVE_ID
 # create your Slack app from app-manifest.json (fill in your deployment URL)
@@ -69,7 +69,11 @@ vercel --prod
 
 Or click-first:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=ANTHROPIC_API_KEY,SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,DRIVE_ID)
+The button asks for the Slack and Google values; add your LLM key (any
+provider above) under the project's **Settings → Environment Variables**, then
+redeploy.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FElnora-AI%2Felnora-slack&root-directory=bot&project-name=slack-agent-bot&repository-name=slack-agent-bot&env=SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REFRESH_TOKEN,DRIVE_ID)
 
 > **Pasting secrets:** when a terminal prompt (`vercel env add`, a provisioning
 > script, or a `.env` step) asks you to paste a token or secret, the terminal

@@ -13,6 +13,7 @@
  */
 
 import { createClient } from "redis";
+import { resolveProvider } from "@/lib/llm-provider";
 
 interface CheckResult {
 	ok: boolean;
@@ -65,16 +66,16 @@ async function pingRedis(): Promise<CheckResult> {
 	}
 }
 
-const PROVIDER_KEY: Record<string, string> = {
-	anthropic: "ANTHROPIC_API_KEY",
-	openrouter: "OPENROUTER_API_KEY",
-	openai: "OPENAI_API_KEY",
-	google: "GOOGLE_GENERATIVE_AI_API_KEY",
-	gemini: "GOOGLE_GENERATIVE_AI_API_KEY",
-};
-
 function envPresent(name: string, detail?: string): CheckResult {
 	return process.env[name] ? { ok: true } : { ok: false, detail: detail ?? `${name} not set` };
+}
+
+// Names the provider and model the bot resolved, and the env var its key came
+// from — never the key itself.
+function llmCheck(): CheckResult {
+	const p = resolveProvider();
+	if (p.problem) return { ok: false, detail: p.problem };
+	return { ok: true, detail: `${p.name} · ${p.model}${p.keyEnv && p.apiKey ? ` · ${p.keyEnv}` : ""}` };
 }
 
 export async function GET() {
@@ -82,10 +83,7 @@ export async function GET() {
 
 	const checks: Record<string, CheckResult> = {
 		redis,
-		// The key the selected LLM_PROVIDER needs (agent.ts falls back to anthropic).
-		llm: envPresent(
-			PROVIDER_KEY[(process.env.LLM_PROVIDER?.trim() || "anthropic").toLowerCase()] ?? "ANTHROPIC_API_KEY",
-		),
+		llm: llmCheck(),
 		slack_bot: envPresent("SLACK_BOT_TOKEN"),
 		slack_signing: envPresent("SLACK_SIGNING_SECRET"),
 	};
