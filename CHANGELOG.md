@@ -3,10 +3,6 @@
 ## [0.4.0](https://github.com/Elnora-AI/elnora-slack/compare/v0.3.7...v0.4.0) (2026-09-24)
 
 
-### ⚠ BREAKING CHANGES
-
-* **bot:** a deployment that set only ANTHROPIC_API_KEY needs OPENROUTER_API_KEY before it upgrades. The Anthropic provider is no longer available.
-
 ### Features
 
 * **bot:** OpenRouter is one provider choice among four, and Anthropic stays the default ([#130](https://github.com/Elnora-AI/elnora-slack/issues/130)) ([b9d74ce](https://github.com/Elnora-AI/elnora-slack/commit/b9d74ce235ac990776106ca4790f733a8d1db5b5))
