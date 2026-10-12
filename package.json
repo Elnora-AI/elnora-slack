@@ -32,7 +32,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/build.mjs",
     "dev": "tsx src/main.ts",
     "generate": "tsx src/generate.ts",
     "test": "vitest run",
@@ -66,15 +66,14 @@
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
+    "@slack/web-api": "^8.0.0",
     "@types/node": "^26.2.0",
+    "commander": "^15.0.0",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.2"
-  },
-  "dependencies": {
-    "@slack/web-api": "^8.0.0",
-    "commander": "^15.0.0"
   },
   "pnpm": {
     "overrides": {
