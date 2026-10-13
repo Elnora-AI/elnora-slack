@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.4.1...v0.4.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* the plugin no longer lists packages Claude Code cannot install ([#148](https://github.com/Elnora-AI/elnora-slack/issues/148)) ([00d64ed](https://github.com/Elnora-AI/elnora-slack/commit/00d64ed5eb8d85da5aaccd285546fc4fe91ffa81))
+
 ## [0.4.1](https://github.com/Elnora-AI/elnora-slack/compare/v0.4.0...v0.4.1) (2026-09-24)
 
 
