@@ -158,7 +158,7 @@ Cross-platform templates for the patterns worth automating — notify-on-failure
 | Node.js | `>=20` |
 | Slack app | Your own app + a bot token (`xoxb-`); a user token (`xoxp-`) only for `search.*` |
 
-npm dependencies (auto-installed): [`@slack/web-api`](https://www.npmjs.com/package/@slack/web-api), [`commander`](https://www.npmjs.com/package/commander).
+No runtime npm dependencies: the CLI ships as one bundled file that includes [`@slack/web-api`](https://www.npmjs.com/package/@slack/web-api) and [`commander`](https://www.npmjs.com/package/commander).
 
 ## Development
 
