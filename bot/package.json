@@ -1,7 +1,7 @@
 {
   "name": "slack-bot-template",
   "private": true,
-  "description": "Deployable two-way Slack AI agent \u2014 the bot half of elnora-slack. Deploy to Vercel, point your Slack app's Events API at it, done.",
+  "description": "Deployable two-way Slack AI agent — the bot half of elnora-slack. Deploy to Vercel, point your Slack app's Events API at it, done.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,26 +12,26 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.63",
-    "@ai-sdk/google": "^4.0.49",
+    "@ai-sdk/google": "^4.0.93",
     "@ai-sdk/openai": "^4.0.23",
     "@chat-adapter/slack": "4.41.1",
     "@chat-adapter/state-memory": "4.41.1",
     "@chat-adapter/state-redis": "4.41.1",
     "@linear/sdk": "^97.1.0",
     "@slack/web-api": "^8.0.0",
-    "ai": "^7.0.114",
+    "ai": "^7.0.137",
     "chat": "4.41.1",
     "googleapis": "^185.0.0",
     "next": "^16.3.4",
     "p-retry": "^8.0.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "redis": "^5.12.1",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
+    "@types/react": "^19.3.0",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
     "vitest": "^5.0.2"
