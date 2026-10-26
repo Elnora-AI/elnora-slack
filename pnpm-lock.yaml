@@ -18,7 +18,7 @@ importers:
         version: 2.5.12
       '@slack/web-api':
         specifier: ^8.0.0
-        version: 8.1.1
+        version: 8.2.0
       '@types/node':
         specifier: ^26.2.0
         version: 26.4.1
@@ -66,7 +66,7 @@ importers:
         version: 97.1.0(graphql@17.0.2)
       '@slack/web-api':
         specifier: ^8.0.0
-        version: 8.1.1
+        version: 8.2.0
       ai:
         specifier: ^7.0.137
         version: 7.0.137(zod@4.6.7)
@@ -882,16 +882,16 @@ packages:
     resolution: {integrity: sha512-sZ9lIgJhPX2qft/tKWiklFlc0o1FWeI7QtciZJfW1+ErH1eGGHvOZ8e73sleTCFEFJp1q/R0WeS8Oa7AsiDprg==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
 
-  '@slack/types@3.1.0':
-    resolution: {integrity: sha512-bTzqrO3lxJ5iWedo1eJKNAs1koyEhaTwKLJUkD3KETnPeQvD978AAE4jvWstUws8Gbbc4JR6iYE6F7XjE8UGmw==}
+  '@slack/types@3.2.0':
+    resolution: {integrity: sha512-IN4gdtlzQt8UJoj+1v+qAHeR4TxHO0KMlIs841SFfDQAcFFnsrWaGsEAE4goxVt8O/JOAFaGGdrFTzhNBop/Fg==}
     engines: {node: '>= 20', npm: '>=9.6.4'}
 
   '@slack/web-api@7.19.0':
     resolution: {integrity: sha512-ItjyjEZml+LDH8CjcCLRLJHh7VZtevPKExrRN3l5KWyBliyDnGAeoO4Y+K+fFBmRpKLYVPgqWMX4THldv2HVtA==}
     engines: {node: '>= 18', npm: '>= 8.6.0'}
 
-  '@slack/web-api@8.1.1':
-    resolution: {integrity: sha512-am/z/LLbEC7gNQp6FpaGT0l4XnWqcXetpwdgZHzS7Nbb96q9R9QwWA3lo0ZXGuAHDkct0MvFnouzuc2Y4XNmow==}
+  '@slack/web-api@8.2.0':
+    resolution: {integrity: sha512-bIW8/8BLD/HLuHLIA2LfA7AhSokzui4swCbMJuwoRJxn/kzHVla6YEKLvN1nCFHK/DfX7g+4Wj3ess/ZSh/tWQ==}
     engines: {node: '>= 20', npm: '>=9.6.4'}
 
   '@standard-schema/spec@1.1.0':
@@ -2525,7 +2525,7 @@ snapshots:
 
   '@slack/types@2.22.0': {}
 
-  '@slack/types@3.1.0': {}
+  '@slack/types@3.2.0': {}
 
   '@slack/web-api@7.19.0':
     dependencies:
@@ -2545,10 +2545,10 @@ snapshots:
       - debug
       - supports-color
 
-  '@slack/web-api@8.1.1':
+  '@slack/web-api@8.2.0':
     dependencies:
       '@slack/logger': 5.0.0
-      '@slack/types': 3.1.0
+      '@slack/types': 3.2.0
       '@types/node': 26.4.1
       '@types/retry': 0.12.5
       eventemitter3: 5.0.4
