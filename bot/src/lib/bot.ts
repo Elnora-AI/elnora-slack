@@ -68,7 +68,13 @@ export const bot = new Chat<typeof adapters, ThreadState>({
 	state,
 	logger: process.env.NODE_ENV === "development" ? "debug" : "info",
 	dedupeTtlMs: 10_000,
+	// Context is read live from Slack on every message and no thread state is written, so the lock the
+	// default "drop" strategy takes protects nothing: it threw away a DM sent while a long run held it.
+	concurrency: "concurrent",
 });
+
+/** Below the route's maxDuration (800s), so the agent stops and the catch replies before Vercel kills it. */
+const AGENT_TIMEOUT_MS = 750_000;
 
 // ---------------------------------------------------------------------------
 // Message handler (shared by all entry points)
@@ -117,7 +123,7 @@ async function handleMessage(thread: BotThread, message: BotMessage, preloaded?:
 		// Generate the full response, then post it. Streaming via thread.post
 		// requires the Slack AI Assistant scopes (assistant:write) — plain
 		// agent.generate + thread.post(string) works with regular chat:write.
-		const result = await agent.generate({ messages });
+		const result = await agent.generate({ messages, timeout: AGENT_TIMEOUT_MS });
 		// Scrub broadcast tokens — an org-wide bot must never mass-ping, even if
 		// the model is prompted into emitting <!channel>/<!here>/<!everyone>.
 		const assistantText = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
@@ -141,8 +147,13 @@ async function handleMessage(thread: BotThread, message: BotMessage, preloaded?:
 	} catch (err) {
 		console.error("Agent error:", err);
 		// Post a generic error to Slack — never leak internal error details
+		const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
 		try {
-			await thread.post("Something went wrong processing your request. Check the deployment logs for details.");
+			await thread.post(
+				timedOut
+					? "That ran out of time before it finished. Anything it already created (notes, Linear issues) stays; ask again for the rest."
+					: "Something went wrong processing your request. Check the deployment logs for details.",
+			);
 		} catch {
 			console.error("Failed to post error message to Slack");
 		}
@@ -379,6 +390,7 @@ Configured action for :${event.rawEmoji}:: ${instruction}
 Carry out the action on behalf of ${reactor}. Use connected tools where the action needs them. If the message doesn't give you enough to act on, say so in one line instead of guessing.`,
 				},
 			],
+			timeout: AGENT_TIMEOUT_MS,
 		});
 		const text = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
 		if (text) await event.thread.post(text);
@@ -423,7 +435,7 @@ async function runSlashCommand(event: SlashEvent, prompt: string): Promise<void>
 		console.error("Slash command echo failed:", err instanceof Error ? err.name : "unknown");
 	}
 	try {
-		const result = await agent.generate({ messages: [{ role: "user", content: prompt }] });
+		const result = await agent.generate({ messages: [{ role: "user", content: prompt }], timeout: AGENT_TIMEOUT_MS });
 		const text = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
 		await event.channel.post(text || "(done)");
 	} catch (err) {
