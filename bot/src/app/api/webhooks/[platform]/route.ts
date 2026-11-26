@@ -11,8 +11,9 @@ import { bot } from "@/lib/bot";
 
 type Platform = keyof typeof bot.webhooks;
 
-/** Allow long-running agent responses (Vercel Pro / fluid compute: max 300s) */
-export const maxDuration = 300;
+/** Long agent runs ("read every idea and file issues") outlast 300s: Vercel Pro with fluid compute allows 800s.
+ * The agent stops itself at AGENT_TIMEOUT_MS (lib/bot.ts) first, so a run that is too long still replies. */
+export const maxDuration = 800;
 
 export async function POST(request: Request, { params }: { params: Promise<{ platform: string }> }): Promise<Response> {
 	const { platform } = await params;
