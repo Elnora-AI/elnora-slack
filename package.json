@@ -65,7 +65,7 @@
   "homepage": "https://github.com/Elnora-AI/elnora-slack",
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
-    "@biomejs/biome": "^2.6.7",
+    "@biomejs/biome": "^2.6.8",
     "@slack/web-api": "^8.0.0",
     "@types/node": "^26.2.0",
     "commander": "^15.1.0",
@@ -73,7 +73,7 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "pnpm": {
     "overrides": {
