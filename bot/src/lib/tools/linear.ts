@@ -109,17 +109,28 @@ const issueFields = {
 };
 const teamKeyField = z.string().max(10).describe("Team key (discover with linearListTeams)");
 const parentIdField = z.string().max(20).optional().describe("Parent issue identifier (e.g. ABC-123) to file under");
+const stateField = z
+	.string()
+	.max(50)
+	.optional()
+	.describe("Workflow state name, e.g. 'Backlog'. Default: the team's To Do state");
 
 type NewIssue = { title: string; description: string; priority?: number; labelNames?: string[] };
 
-/** Files issues in one team's To Do state, resolving the team, state, labels and parent once for all of them. */
-async function createIssues(teamKey: string, items: NewIssue[], parentIdentifier?: string) {
+/** Files issues in one team's state (To Do unless named), resolving team, state, labels and parent once for all. */
+async function createIssues(teamKey: string, items: NewIssue[], parentIdentifier?: string, stateName?: string) {
 	const client = getClient();
 	const teams = await client.teams();
 	const team = teams.nodes.find((t) => t.key === teamKey);
 	if (!team) return { error: `Team "${teamKey}" not found. Available: ${teams.nodes.map((t) => t.key).join(", ")}` };
 	const states = await team.states();
-	const todoState = states.nodes.find((s) => s.name === "To Do" || s.name === "Todo");
+	const wantedState = stateName?.trim().toLowerCase();
+	const todoState = wantedState
+		? states.nodes.find((s) => s.name.toLowerCase() === wantedState)
+		: states.nodes.find((s) => s.name === "To Do" || s.name === "Todo");
+	if (wantedState && !todoState) {
+		return { error: `State "${stateName}" not found. Available: ${states.nodes.map((s) => s.name).join(", ")}` };
+	}
 	const parent = parentIdentifier ? await resolveIssueByIdentifier(client, parentIdentifier) : null;
 	if (parentIdentifier && !parent) return { error: `Parent issue ${parentIdentifier} not found` };
 	const wanted = new Set(items.flatMap((i) => i.labelNames ?? []));
@@ -152,10 +163,10 @@ async function createIssues(teamKey: string, items: NewIssue[], parentIdentifier
 
 export const linearCreateIssue = tool({
 	description:
-		"Create a new Linear issue. Defaults to the team's \"To Do\" state, never Backlog. Use linearListTeams first if you don't know the team keys. For several issues at once use linearCreateIssues.",
-	inputSchema: z.object({ ...issueFields, teamKey: teamKeyField, parentId: parentIdField }),
-	execute: async ({ teamKey, parentId, ...item }) => {
-		const out = await createIssues(teamKey, [item], parentId);
+		"Create a new Linear issue. Defaults to the team's \"To Do\" state; pass state to file it elsewhere, e.g. Backlog. Use linearListTeams first if you don't know the team keys. For several issues at once use linearCreateIssues.",
+	inputSchema: z.object({ ...issueFields, teamKey: teamKeyField, parentId: parentIdField, state: stateField }),
+	execute: async ({ teamKey, parentId, state, ...item }) => {
+		const out = await createIssues(teamKey, [item], parentId, state);
 		if ("error" in out) return out;
 		if (out.failed.length) return { error: `Issue creation failed: ${out.failed[0].error}` };
 		return { ...out.created[0], state: out.state };
@@ -168,9 +179,10 @@ export const linearCreateIssues = tool({
 	inputSchema: z.object({
 		teamKey: teamKeyField,
 		parentId: parentIdField,
+		state: stateField,
 		issues: z.array(z.object(issueFields)).min(1).max(25),
 	}),
-	execute: async ({ teamKey, parentId, issues }) => createIssues(teamKey, issues, parentId),
+	execute: async ({ teamKey, parentId, state, issues }) => createIssues(teamKey, issues, parentId, state),
 });
 
 async function resolveIssueByIdentifier(client: ReturnType<typeof getClient>, identifier: string) {
