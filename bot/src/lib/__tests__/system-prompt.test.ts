@@ -48,6 +48,12 @@ describe("buildSystemPrompt", () => {
 		expect(prompt).not.toContain("**Web search**");
 	});
 
+	it("carries the issues-from-a-resource procedure only when Linear is connected", () => {
+		expect(buildSystemPrompt()).not.toContain("## Issues from a link, paper or post");
+		vi.stubEnv("LINEAR_API_KEY", "lin_test");
+		expect(buildSystemPrompt()).toContain("## Issues from a link, paper or post");
+	});
+
 	it("SYSTEM_PROMPT replaces the persona but guardrails survive", () => {
 		vi.stubEnv("SYSTEM_PROMPT", "You are a pirate.");
 		const prompt = buildSystemPrompt();

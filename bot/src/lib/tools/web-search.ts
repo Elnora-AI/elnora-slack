@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { EXTRACT_PART_CHARS, pagePart } from "../page-part";
 
 const TAVILY_BASE = "https://api.tavily.com";
 
@@ -71,12 +72,17 @@ export const webSearch = tool({
 });
 
 export const webExtract = tool({
-	description:
-		"Extract clean text content from a specific URL. Use when someone shares a link and asks about its content.",
+	description: `Extract clean text content from a specific URL. Use when someone shares a link and asks about its content. Long pages come in parts of ${EXTRACT_PART_CHARS} characters: to read the whole page, call again with offset set to nextOffset until nextOffset is null.`,
 	inputSchema: z.object({
 		url: z.url().max(2000).describe("URL to extract content from"),
+		offset: z
+			.number()
+			.int()
+			.min(0)
+			.optional()
+			.describe("Where to continue a long page: the previous call's nextOffset"),
 	}),
-	execute: async ({ url }) => {
+	execute: async ({ url, offset }) => {
 		// Block private/internal URLs to prevent SSRF
 		if (!isPublicUrl(url)) {
 			return { error: "Only public HTTPS URLs are supported" };
@@ -107,10 +113,6 @@ export const webExtract = tool({
 
 		if (!result) return { error: "Could not extract content from URL" };
 
-		return {
-			url: result.url,
-			content: result.raw_content?.slice(0, 15000) ?? result.content?.slice(0, 15000),
-			truncated: (result.raw_content?.length ?? 0) > 15000,
-		};
+		return { url: result.url, ...pagePart(result.raw_content ?? result.content ?? "", offset ?? 0) };
 	},
 });

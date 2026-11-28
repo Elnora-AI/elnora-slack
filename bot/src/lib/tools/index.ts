@@ -71,7 +71,7 @@ export function toolGroups(): ToolGroup[] {
 			key: "linear",
 			label: "Linear",
 			promptHint:
-				"Create, update, and search Linear issues (`linear*`). Use `linearListTeams` to discover team keys before creating. For latest/newest/recent issues use `linearRecentIssues` (sorted by recency) — `linearSearchIssues` ranks by relevance, not recency. New issues default to the team's To Do state.",
+				"Create, update, and search Linear issues (`linear*`). Use `linearListTeams` to discover team keys before creating. File several issues in one call with `linearCreateIssues`, optionally under a parent. For latest/newest/recent issues use `linearRecentIssues` (sorted by recency) — `linearSearchIssues` ranks by relevance, not recency. New issues default to the team's To Do state.",
 			enabled: !!process.env.LINEAR_API_KEY,
 			tools: { ...linear },
 		},
