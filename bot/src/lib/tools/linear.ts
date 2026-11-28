@@ -96,58 +96,81 @@ export const linearRecentIssues = tool({
 	},
 });
 
+const issueFields = {
+	title: z.string().max(500).describe("Issue title"),
+	// Required: a title-only issue tells nobody what to do or how to know it is done.
+	description: z
+		.string()
+		.min(20)
+		.max(10000)
+		.describe("Issue description (markdown): what to do, why it matters, and how to tell it is done"),
+	priority: z.number().optional().describe("1=urgent, 2=high, 3=medium, 4=low"),
+	labelNames: z.array(z.string().max(100)).optional().describe("Label names to apply"),
+};
+const teamKeyField = z.string().max(10).describe("Team key (discover with linearListTeams)");
+const parentIdField = z.string().max(20).optional().describe("Parent issue identifier (e.g. ABC-123) to file under");
+
+type NewIssue = { title: string; description: string; priority?: number; labelNames?: string[] };
+
+/** Files issues in one team's To Do state, resolving the team, state, labels and parent once for all of them. */
+async function createIssues(teamKey: string, items: NewIssue[], parentIdentifier?: string) {
+	const client = getClient();
+	const teams = await client.teams();
+	const team = teams.nodes.find((t) => t.key === teamKey);
+	if (!team) return { error: `Team "${teamKey}" not found. Available: ${teams.nodes.map((t) => t.key).join(", ")}` };
+	const states = await team.states();
+	const todoState = states.nodes.find((s) => s.name === "To Do" || s.name === "Todo");
+	const parent = parentIdentifier ? await resolveIssueByIdentifier(client, parentIdentifier) : null;
+	if (parentIdentifier && !parent) return { error: `Parent issue ${parentIdentifier} not found` };
+	const wanted = new Set(items.flatMap((i) => i.labelNames ?? []));
+	const labels = wanted.size ? (await client.issueLabels()).nodes.filter((l) => wanted.has(l.name)) : [];
+
+	const created: Array<{ id: string; title: string; url: string }> = [];
+	const failed: Array<{ title: string; error: string }> = [];
+	for (const item of items) {
+		try {
+			const result = await client.createIssue({
+				teamId: team.id,
+				title: item.title,
+				description: item.description,
+				priority: item.priority,
+				stateId: todoState?.id,
+				parentId: parent?.id,
+				labelIds: item.labelNames?.length
+					? labels.filter((l) => item.labelNames?.includes(l.name)).map((l) => l.id)
+					: undefined,
+			});
+			const issue = await result.issue;
+			if (issue) created.push({ id: issue.identifier, title: issue.title, url: issue.url });
+			else failed.push({ title: item.title, error: "the API returned no issue" });
+		} catch (err) {
+			failed.push({ title: item.title, error: err instanceof Error ? err.message : "unknown error" });
+		}
+	}
+	return { created, failed, state: todoState?.name ?? "default" };
+}
+
 export const linearCreateIssue = tool({
 	description:
-		"Create a new Linear issue. Defaults to the team's \"To Do\" state, never Backlog. Use linearListTeams first if you don't know the team keys.",
-	inputSchema: z.object({
-		title: z.string().max(500).describe("Issue title"),
-		description: z.string().max(5000).optional().describe("Issue description (markdown)"),
-		teamKey: z.string().max(10).describe("Team key (discover with linearListTeams)"),
-		priority: z.number().optional().describe("1=urgent, 2=high, 3=medium, 4=low"),
-		labelNames: z.array(z.string().max(100)).optional().describe("Label names to apply"),
-	}),
-	execute: async ({ title, description, teamKey, priority, labelNames }) => {
-		const client = getClient();
-
-		// Find team
-		const teams = await client.teams();
-		const team = teams.nodes.find((t) => t.key === teamKey);
-		if (!team) {
-			return {
-				error: `Team "${teamKey}" not found. Available: ${teams.nodes.map((t) => t.key).join(", ")}`,
-			};
-		}
-
-		// Find "To Do" state for this team
-		const states = await team.states();
-		const todoState = states.nodes.find((s) => s.name === "To Do" || s.name === "Todo");
-
-		// Resolve labels if provided
-		let labelIds: string[] | undefined;
-		if (labelNames?.length) {
-			const allLabels = await client.issueLabels();
-			labelIds = allLabels.nodes.filter((l) => labelNames.includes(l.name)).map((l) => l.id);
-		}
-
-		const result = await client.createIssue({
-			teamId: team.id,
-			title,
-			description,
-			priority,
-			stateId: todoState?.id,
-			labelIds,
-		});
-
-		const issue = await result.issue;
-		if (!issue) return { error: "Issue creation failed — API returned no issue data" };
-
-		return {
-			id: issue.identifier,
-			title: issue.title,
-			url: issue.url,
-			state: todoState?.name ?? "default",
-		};
+		"Create a new Linear issue. Defaults to the team's \"To Do\" state, never Backlog. Use linearListTeams first if you don't know the team keys. For several issues at once use linearCreateIssues.",
+	inputSchema: z.object({ ...issueFields, teamKey: teamKeyField, parentId: parentIdField }),
+	execute: async ({ teamKey, parentId, ...item }) => {
+		const out = await createIssues(teamKey, [item], parentId);
+		if ("error" in out) return out;
+		if (out.failed.length) return { error: `Issue creation failed: ${out.failed[0].error}` };
+		return { ...out.created[0], state: out.state };
 	},
+});
+
+export const linearCreateIssues = tool({
+	description:
+		"Create up to 25 Linear issues in one call, all in one team and optionally under one parent issue. Use this instead of many linearCreateIssue calls, e.g. one issue per idea from a paper.",
+	inputSchema: z.object({
+		teamKey: teamKeyField,
+		parentId: parentIdField,
+		issues: z.array(z.object(issueFields)).min(1).max(25),
+	}),
+	execute: async ({ teamKey, parentId, issues }) => createIssues(teamKey, issues, parentId),
 });
 
 async function resolveIssueByIdentifier(client: ReturnType<typeof getClient>, identifier: string) {
