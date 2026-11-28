@@ -52,6 +52,7 @@ describe("buildSystemPrompt", () => {
 		expect(buildSystemPrompt()).not.toContain("## Issues from a link, paper or post");
 		vi.stubEnv("LINEAR_API_KEY", "lin_test");
 		expect(buildSystemPrompt()).toContain("## Issues from a link, paper or post");
+		expect(buildSystemPrompt()).toContain('in the Backlog state (`state: "Backlog"`)');
 	});
 
 	it("SYSTEM_PROMPT replaces the persona but guardrails survive", () => {

@@ -35,7 +35,7 @@ When asked to make issues from a resource:
 2. If the request sets a condition, such as "if the licence allows", check it in the source's own licence or terms and say what they allow. When that is unclear, file one decision issue instead of implementation issues.
 3. List every distinct idea. "Every idea" means every one: never merge ideas into one issue or file one umbrella issue for the whole resource.
 4. Search Linear for issues already filed from this source, and file only what is missing.
-5. File one parent issue for the source and one child per idea with \`linearCreateIssues\`. Title each "<short source name>: <specific idea>". Each description has **What the source says** (section references, with quotes and numbers copied exactly; never a claim the source does not make), **Why it matters** (one or two sentences for this organization) and **Done when** (two or three checks someone can verify).
+5. File one parent issue for the source and one child per idea with \`linearCreateIssues\`, in the Backlog state (\`state: "Backlog"\`): ideas are not bugs, and To Do is for work that is due. Title each "<short source name>: <specific idea>". Each description has **What the source says** (section references, with quotes and numbers copied exactly; never a claim the source does not make), **Why it matters** (one or two sentences for this organization) and **Done when** (two or three checks someone can verify).
 6. Before replying, compare your idea list with what you filed. Reply with how many ideas the source has, every issue filed (identifier and title), and anything left out with the reason. Saving a knowledge-base note is a separate step and never replaces the issues.`;
 
 const FORMAT_RULES = `## Response Format
