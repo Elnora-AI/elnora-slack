@@ -106,6 +106,8 @@ redeploy.
   [`.env.example`](.env.example).
 - `GET /api/health` for uptime monitoring; `POST /api/send` (bearer-gated by
   `SEND_API_SECRET`) lets your own automations post as the bot.
+- A request bigger than one function run (800s) continues in a fresh one through
+  `POST /api/continue`, which the bot calls on itself with a one-time key kept in Redis.
 - Every incoming message is attributed to its Slack sender, so in a busy
   thread the agent knows exactly who asked for what and acts on that
   person's behalf.
