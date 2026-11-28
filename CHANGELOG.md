@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.3](https://github.com/Elnora-AI/elnora-slack/compare/v0.4.2...v0.4.3) (2026-11-28)
+
+
+### Bug Fixes
+
+* **bot:** a big request runs to the end instead of stopping at the 15-step cap ([#188](https://github.com/Elnora-AI/elnora-slack/issues/188)) ([1ff7160](https://github.com/Elnora-AI/elnora-slack/commit/1ff7160ccc1da85be4c3f25dc1a614764708f09d))
+* **bot:** a long agent run replies instead of dying silently, and a DM sent meanwhile is not dropped ([#184](https://github.com/Elnora-AI/elnora-slack/issues/184)) ([09f9625](https://github.com/Elnora-AI/elnora-slack/commit/09f962516efa0aa9144e8e4b7a35324cead09193))
+* **bot:** a run cut short by the step cap says so instead of "(done — no message)" ([#187](https://github.com/Elnora-AI/elnora-slack/issues/187)) ([fd02d98](https://github.com/Elnora-AI/elnora-slack/commit/fd02d98661b794a7c712e0d31510484144f3aeac))
+* **bot:** ideas filed from a paper or post go to Backlog, not To Do ([#190](https://github.com/Elnora-AI/elnora-slack/issues/190)) ([c933fe7](https://github.com/Elnora-AI/elnora-slack/commit/c933fe782eb1242a49bbd980bfc60180c8d718e3))
+* **bot:** issues filed from a paper or post cover every idea and say what to do ([#189](https://github.com/Elnora-AI/elnora-slack/issues/189)) ([b815708](https://github.com/Elnora-AI/elnora-slack/commit/b8157086cd35c0ea1c721ceba660da3b19bcfd03))
+
 ## [0.4.2](https://github.com/Elnora-AI/elnora-slack/compare/v0.4.1...v0.4.2) (2026-10-13)
 
 
