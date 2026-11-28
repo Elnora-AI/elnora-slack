@@ -16,12 +16,14 @@ import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { createRedisState } from "@chat-adapter/state-redis";
 import { WebClient } from "@slack/web-api";
+import type { ModelMessage } from "ai";
 import { Chat } from "chat";
-import { agent, maxSteps } from "./agent";
+import { agent } from "./agent";
+import { runInChunks } from "./agent-run";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
 import { blogWorkflowConfig, dispatchBlogIdea } from "./blog-idea";
 import { resolveEmojiAction } from "./emoji-actions";
-import { emptyReplyText } from "./empty-reply";
+import { emptyReplyText, stoppedText } from "./empty-reply";
 import { scrubSlackBroadcasts } from "./slack-scrub";
 import {
 	classifyThreadMessages,
@@ -78,6 +80,108 @@ export const bot = new Chat<typeof adapters, ThreadState>({
 const AGENT_TIMEOUT_MS = 750_000;
 
 // ---------------------------------------------------------------------------
+// Agent runs that outlast one invocation
+// ---------------------------------------------------------------------------
+
+/** How many fresh invocations (each up to AGENT_TIMEOUT_MS) one request may run on before the bot stops it. */
+const MAX_HANDOFFS = 5;
+const RUN_KEY_PREFIX = "agent-run:";
+
+/** A run in progress as the next invocation receives it: the conversation so far, tool results included. */
+export interface AgentRunJob {
+	messages: ModelMessage[];
+	target: { threadId: string } | { channelId: string };
+	toolNames: string[];
+	handoffs: number;
+}
+
+type Postable = { post(text: string): Promise<unknown> };
+
+/**
+ * Runs the agent for this invocation and replies. The step cap bounds a chunk (agent-run.ts), and a request
+ * that outlasts the invocation is handed to a fresh one with its messages (POST /api/continue), so neither
+ * MAX_STEPS nor the 800s function limit stops a big request part-way.
+ */
+async function runAndReply(job: AgentRunJob, to: Postable): Promise<void> {
+	try {
+		// Generate the full response, then post it. Streaming via thread.post
+		// requires the Slack AI Assistant scopes (assistant:write) — plain
+		// agent.generate + thread.post(string) works with regular chat:write.
+		const outcome = await runInChunks(job.messages, Date.now() + AGENT_TIMEOUT_MS, (messages, timeout) =>
+			agent.generate({ messages, timeout }),
+		);
+		const toolNames = [...job.toolNames, ...outcome.toolNames];
+		if (outcome.done) {
+			// Scrub broadcast tokens — an org-wide bot must never mass-ping, even if
+			// the model is prompted into emitting <!channel>/<!here>/<!everyone>.
+			const text = scrubSlackBroadcasts(outcome.text).slice(0, MAX_MSG_LENGTH);
+			await postSafely(to, text || emptyReplyText(toolNames));
+			return;
+		}
+		const next: AgentRunJob = { ...job, messages: outcome.messages, toolNames, handoffs: job.handoffs + 1 };
+		if (job.handoffs < MAX_HANDOFFS && (await handOff(next))) return;
+		await postSafely(to, stoppedText(toolNames));
+	} catch (err) {
+		console.error("Agent error:", err);
+		// Post a generic error to Slack — never leak internal error details
+		const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
+		await postSafely(
+			to,
+			timedOut
+				? "That ran out of time before it finished. Anything it already created (notes, Linear issues) stays; ask again for the rest."
+				: "Something went wrong processing your request. Check the deployment logs for details.",
+		);
+	}
+}
+
+async function postSafely(to: Postable, text: string): Promise<void> {
+	try {
+		await to.post(text);
+	} catch (err) {
+		console.error("Failed to post to Slack:", err instanceof Error ? err.name : "unknown");
+	}
+}
+
+/** Stores the run under a one-time random key and starts POST /api/continue on it; false when that cannot happen. */
+async function handOff(job: AgentRunJob): Promise<boolean> {
+	const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+	// The next invocation reads the run from shared state, and in-memory state is not shared.
+	if (!process.env.REDIS_URL || !host) return false;
+	const key = `${RUN_KEY_PREFIX}${crypto.randomUUID()}`;
+	try {
+		await state.set(key, job, 60 * 60_000);
+		const res = await fetch(`https://${host}/api/continue`, {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ key }),
+			signal: AbortSignal.timeout(20_000),
+		});
+		if (res.ok) return true;
+		console.error("agent.handoff: /api/continue answered", res.status);
+	} catch (err) {
+		console.error("agent.handoff failed:", err instanceof Error ? err.name : "unknown");
+	}
+	await state.delete(key).catch(() => undefined);
+	return false;
+}
+
+/** The run stored under `key`, taken once: null when the key is unknown, expired or already taken. */
+export async function takeAgentRun(key: string): Promise<AgentRunJob | null> {
+	if (!key.startsWith(RUN_KEY_PREFIX)) return null;
+	await bot.initialize();
+	const job = await state.get<AgentRunJob>(key);
+	if (job) await state.delete(key);
+	return job;
+}
+
+export async function continueAgentRun(job: AgentRunJob): Promise<void> {
+	await runAndReply(
+		job,
+		"threadId" in job.target ? bot.thread(job.target.threadId) : bot.channel(job.target.channelId),
+	);
+}
+
+// ---------------------------------------------------------------------------
 // Message handler (shared by all entry points)
 // ---------------------------------------------------------------------------
 
@@ -120,45 +224,9 @@ async function handleMessage(thread: BotThread, message: BotMessage, preloaded?:
 		{ role: "user" as const, content: `[from ${sender} (<@${message.author.userId}>)] ${userText}` },
 	];
 
-	try {
-		// Generate the full response, then post it. Streaming via thread.post
-		// requires the Slack AI Assistant scopes (assistant:write) — plain
-		// agent.generate + thread.post(string) works with regular chat:write.
-		const result = await agent.generate({ messages, timeout: AGENT_TIMEOUT_MS });
-		// Scrub broadcast tokens — an org-wide bot must never mass-ping, even if
-		// the model is prompted into emitting <!channel>/<!here>/<!everyone>.
-		const assistantText = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
-
-		if (assistantText) {
-			try {
-				await thread.post(assistantText);
-			} catch (postErr) {
-				console.error("Failed to post agent response to Slack:", postErr);
-			}
-		} else {
-			// No final text: usually the step cap cut the run short. Say so, and what it did.
-			try {
-				await thread.post(emptyReplyText(await result.steps, maxSteps()));
-			} catch (postErr) {
-				console.error("Failed to post empty-result placeholder to Slack:", postErr);
-			}
-		}
-		// No thread-state write needed — context is read live from Slack on each
-		// message (see fetchSlackContext), so there is nothing to persist.
-	} catch (err) {
-		console.error("Agent error:", err);
-		// Post a generic error to Slack — never leak internal error details
-		const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
-		try {
-			await thread.post(
-				timedOut
-					? "That ran out of time before it finished. Anything it already created (notes, Linear issues) stays; ask again for the rest."
-					: "Something went wrong processing your request. Check the deployment logs for details.",
-			);
-		} catch {
-			console.error("Failed to post error message to Slack");
-		}
-	}
+	// No thread-state write needed — context is read live from Slack on each
+	// message (see fetchSlackContext), so there is nothing to persist.
+	await runAndReply({ messages, target: { threadId: thread.id }, toolNames: [], handoffs: 0 }, thread);
 }
 
 // ---------------------------------------------------------------------------
@@ -435,14 +503,15 @@ async function runSlashCommand(event: SlashEvent, prompt: string): Promise<void>
 	} catch (err) {
 		console.error("Slash command echo failed:", err instanceof Error ? err.name : "unknown");
 	}
-	try {
-		const result = await agent.generate({ messages: [{ role: "user", content: prompt }], timeout: AGENT_TIMEOUT_MS });
-		const text = scrubSlackBroadcasts(await result.text).slice(0, MAX_MSG_LENGTH);
-		await event.channel.post(text || "(done)");
-	} catch (err) {
-		console.error("Slash command error:", err instanceof Error ? err.name : "unknown");
-		await event.channel.post("Something went wrong. Check the deployment logs.");
-	}
+	await runAndReply(
+		{
+			messages: [{ role: "user", content: prompt }],
+			target: { channelId: event.channel.id },
+			toolNames: [],
+			handoffs: 0,
+		},
+		event.channel,
+	);
 }
 
 // /ask — general question to the agent (uses any connected tools).
