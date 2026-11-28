@@ -17,10 +17,11 @@ import { createMemoryState } from "@chat-adapter/state-memory";
 import { createRedisState } from "@chat-adapter/state-redis";
 import { WebClient } from "@slack/web-api";
 import { Chat } from "chat";
-import { agent } from "./agent";
+import { agent, maxSteps } from "./agent";
 import { isAuthorized, UNAUTHORIZED_MSG } from "./authorize";
 import { blogWorkflowConfig, dispatchBlogIdea } from "./blog-idea";
 import { resolveEmojiAction } from "./emoji-actions";
+import { emptyReplyText } from "./empty-reply";
 import { scrubSlackBroadcasts } from "./slack-scrub";
 import {
 	classifyThreadMessages,
@@ -135,9 +136,9 @@ async function handleMessage(thread: BotThread, message: BotMessage, preloaded?:
 				console.error("Failed to post agent response to Slack:", postErr);
 			}
 		} else {
-			// Tool-only step (no final text) — let the user know rather than going silent.
+			// No final text: usually the step cap cut the run short. Say so, and what it did.
 			try {
-				await thread.post("(done — no message)");
+				await thread.post(emptyReplyText(await result.steps, maxSteps()));
 			} catch (postErr) {
 				console.error("Failed to post empty-result placeholder to Slack:", postErr);
 			}

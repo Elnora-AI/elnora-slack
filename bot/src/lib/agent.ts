@@ -3,7 +3,7 @@ import { resolveModel } from "./llm-provider";
 import { buildSystemPrompt } from "./system-prompt";
 import { buildTools } from "./tools";
 
-function maxSteps(): number {
+export function maxSteps(): number {
 	const parsed = Number.parseInt(process.env.MAX_STEPS ?? "", 10);
 	return Number.isFinite(parsed) && parsed > 0 && parsed <= 50 ? parsed : 15;
 }
